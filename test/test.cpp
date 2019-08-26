@@ -1,8 +1,10 @@
 #include "hex.hpp"
+#include "math.hpp"
 #include <iostream>     // ostream, cout
 #include <cmath>        // sqrt
 #include <vector>       // vector
 #include <functional>   // function
+#include <array>        // array
 
 using namespace hexes;
 using namespace std;
@@ -67,10 +69,42 @@ void test_Hex(ostream& out)
     }
 }
 
+void test_angle_to_vec(ostream& out)
+{
+    out << "Testing angle_to_vec\n";
+    const int size = 6;
+    array<float, size> angles{
+        0.0f,         PI/3.0f, PI/2.0f,    PI, 4.1f/sqrt(3.0f), 3.0f*PI/2.0f
+    };
+    array<float, size> xcomp{
+        1.0f,            0.5f,    0.0f, -1.0f,      -0.714801f,         0.0f
+    };
+    array<float, size> ycomp{
+        0.0f, sqrt(3.0f)/2.0f,    1.0f,  0.0f,       0.699328f,        -1.0f
+    };
+    bool failed = false;
+
+    for (int i = 0; i < size; ++i) {
+        auto th = angles[i];
+        auto x = xcomp[i];
+        auto y = ycomp[i];
+
+        auto v = angle_to_vec(th);
+        if ((abs(v[0]-x) > EPS) || (abs(v[1]-y) > EPS)) {
+            failed = true;
+            out << "\tangle_to_vec(" << th << ") gave {" << v[0] << ", "
+                << v[1] << "}; expected {" << x << ", " << y << "}\n";
+        }
+    }
+    if (!failed) {
+        out << "\tTest Passed!\n";
+    }
+}
+
 int main()
 {
     vector<test_func> tests{
-        test_Hex
+        test_Hex, test_angle_to_vec
     };
 
     for (auto test : tests) {
