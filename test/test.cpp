@@ -5,8 +5,11 @@
 #include <vector>       // vector
 #include <functional>   // function
 #include <array>        // array
+#include <valarray>     // valarray, abs(valarray)
+#include <sstream>      // stringstream
 
 using namespace hexes;
+using namespace std::literals::string_literals;
 using namespace std;
 
 using test_func = function<void(ostream&)>;
@@ -101,10 +104,138 @@ void test_angle_to_vec(ostream& out)
     }
 }
 
+string vecstr(valarray<float> vec)
+{
+    stringstream ss;
+    ss << "{";
+    auto sep = "";
+    for (auto x : vec) {
+        ss << sep << x;
+        sep = ", ";
+    }
+    ss << "}";
+    return ss.str();
+}
+
+void test_row_and_col(ostream& out)
+{
+    out << "Testing row() and col()\n";
+
+    // testing row and col with good input
+    using slicefunc = function<slice(int)>;
+    array<slicefunc, 2> funcs{row, col};
+    array<string, 2> names{"row"s, "col"s};
+    array<int, 2> strides{1, 2};
+    array<int, 4> starts{0, 2, 0, 1};
+
+    bool failed = false;
+
+    for (int k = 0; k < 4; ++k) {
+        const int i = k % 2;
+        const int j = k / 2;
+
+        auto name = names[j];
+        auto func = funcs[j];
+
+        slice actual;
+        try {
+            actual = func(i);
+        }
+        catch (...) {
+            failed = true;
+            out << "\t" << name << "(" << i << ") threw an error; expected "
+                << "slice(" << starts[k] << ", 2, " << strides[j] << ")\n";
+            continue;
+        }
+        bool starts_equal = actual.start() == size_t(starts[k]);
+        bool sizes_equal = actual.size() == size_t(2);
+        bool strides_equal = actual.stride() == size_t(strides[j]);
+
+        if (!starts_equal || !sizes_equal || !strides_equal) {
+            failed = true;
+            out << "\t" << name << "(" << i << ") gave slice("
+                << actual.start() << ", " << actual.size() << ", "
+                << actual.stride() << "); expected slice(" << starts[k]
+                << ", 2, " << strides[j] << ")\n";
+        }
+    }
+
+    // testing row and col with bad input
+    array<int, 2> bad_indices{-1, 2};
+    for (int k = 0; k < 4; ++k) {
+
+        const int i = k % 2;
+        const int j = k / 2;
+
+        auto name = names[j];
+        auto func = funcs[j];
+
+        bool caught = false;
+        slice actual;
+        try {
+            actual = func(bad_indices[i]);
+        }
+        catch (...) {
+            caught = true;
+        }
+        if (!caught) {
+            failed = true;
+            out << "\t" << name << "(" << i << ") gave slice("
+                << actual.start() << ", " << actual.size() << ", "
+                << actual.stride() << "); excpected an exception\n";
+        }
+    }
+
+    // Wrap up
+    if (!failed) {
+        out << "\tTest Passed!\n";
+    }
+}
+
+/*void test_hex_basis(ostream& out)
+ *{
+ *    const float num_tests = 3;
+ *    array<float, num_tests> sizes{
+ *        0.3f,    1.0f,  5.3f
+ *    };
+ *    array<float, num_tests> angles{
+ *        0.0f, PI/6.0f, 33.4f
+ *    };
+ *
+ *    array<valarray<float>, num_tests> expected_vecs{
+ *        {           0.3f,     0.15f,     0.0f, 0.259808f},
+ *        {sqrt(3.0f)/2.0f,      0.0f,     0.0f,      1.0f},
+ *        {      -2.12855f, -5.26778f, 4.85379f, 0.583519f}
+ *    };
+ *    for (auto vec : expected_vecs) {
+ *        vec *= 2.0f*sin(PI/3.0f);
+ *    }
+ *
+ *    out << "Testing hex_basis\n";
+ *
+ *    bool failed = false;
+ *    bool caught = false;
+ *    for (int i = 0; i < num_tests; ++i) {
+ *        auto size = size[i];
+ *        auto th = angles[i];
+ *        auto expected = expected_vecs[i];
+ *
+ *        auto actual = hex_basis(size, th);
+ *
+ *        if (abs(actual-expected) > EPS) {
+ *            failed = true;
+ *            out << "hex_basis(" << size << ", " << th << ") gave a basis of "
+ *                << vecstr(actual) << "; expected " << vectstr(expected)
+ *                << "\n";
+ *        }
+ *    }
+ *}
+ */
+
 int main()
 {
     vector<test_func> tests{
-        test_Hex, test_angle_to_vec
+        test_Hex, test_angle_to_vec, test_row_and_col
     };
 
     for (auto test : tests) {
