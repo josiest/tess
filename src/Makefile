@@ -5,4 +5,4 @@ CC = g++
 CFLAGS = -Wall
 
 test:
-	$(CC) $(CFLAGS) -o test hex.hpp hex.cpp test.cpp
+	$(CC) $(CFLAGS) -o ../build/test hex.hpp hex.cpp test.cpp
