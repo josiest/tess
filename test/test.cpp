@@ -1,5 +1,7 @@
 #include "hex.hpp"
 #include "math.hpp"
+#include "grid.hpp"
+#include "point.hpp"
 #include <iostream>     // ostream, cout
 #include <cmath>        // sqrt
 #include <vector>       // vector
@@ -276,10 +278,95 @@ void test_hex_basis(ostream& out)
     }
 }
 
+void test_Grid(ostream& out)
+{
+    // testing grid with bad input
+    out << "Testing grid constructors\n";
+    bool failed = false;
+    bool caught = false;
+    try {
+        Grid(-1.0f, HexType::FLAT);
+    }
+    catch (...) {
+        caught = true;
+    }
+    if (!caught) {
+        failed = true;
+        out << "\tGrid() didn't throw an exception\n";
+    }
+
+    caught = false;
+    try {
+        Grid(-0.0001f, -0.0001f);
+    }
+    catch (...) {
+        caught = true;
+    }
+    if (!caught) {
+        failed = true;
+        out << "\tGrid() didn't throw an exception\n";
+    }
+
+    caught = false;
+    try {
+        Grid(1.0f, -1.0f, -13.33f, 0.25f);
+    }
+    catch (...) {
+        caught = true;
+    }
+    if (!caught) {
+        failed = true;
+        out << "\tGrid() didn't throw an exception\n";
+    }
+
+    // Wrap up
+    if (!failed) {
+        out << "\tTest Passed!\n";
+    }
+}
+
+void test_hex_to_cartesian(ostream& out)
+{
+    // testing hex_to_cartesian with good input
+    constexpr int num_tests = 4;
+    array<Grid, num_tests> grids{
+        Grid(1.0f, HexType::POINTED), Grid(0.21f, HexType::FLAT),
+        Grid(3.87f, PI/sqrt(71.0f)), Grid(73.0f, -13.4f, 15.0f, -77.2f)
+    };
+    array<Hex, num_tests> hexes{
+        Hex(0.0f, 0.0f), Hex(0.5f, -0.5f),
+        Hex(32.3f, 17.4f), Hex(-20.2f, -0.13f)
+    };
+    array<Point, num_tests> expected_points{
+        Point{0.0f, 0.0f}, Point{0.1575f, -0.0909327f},
+        Point{219.15f, 194.175f}, Point{190.685f, 499.787}
+    };
+
+    out << "Testing grid.hex_to_cartesian\n";
+
+    bool failed = false;
+    for (int i = 0; i < num_tests; ++i) {
+        auto expected = expected_points[i];
+        auto actual = grids[i].hex_to_cartesian(hexes[i]);
+
+        if ((actual-expected).magnitude() > EPS) {
+            failed = true;
+            out << "\tGrid converted hex coordinate " << hexes[i]
+                << " to cartesian coordinate " << actual << "; expected "
+                << expected << "\n";
+        }
+    }
+
+    if (!failed) {
+        out << "\tTest Passed!\n";
+    }
+}
+
 int main()
 {
     vector<test_func> tests{
-        test_Hex, test_angle_to_vec, test_row_and_col, test_hex_basis
+        test_Hex, test_angle_to_vec, test_row_and_col, test_hex_basis,
+        test_Grid, test_hex_to_cartesian
     };
 
     for (auto test : tests) {
