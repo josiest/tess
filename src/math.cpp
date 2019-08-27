@@ -26,13 +26,16 @@ namespace hexes {
         return slice(i, 2, 2);
     }
 
-    //valarray<float> hex_basis(float size, float th)
-    //{
-    //    const float l = 2.0f*sin(PI/3.0f);
-    //    valarray<float> basis(4);
-    //    basis[row(0)] = angle_to_vec(th);
-    //    basis[row(1)] = angle_to_vec(th+PI/6.0f);
-    //    basis *= size*l;
-    //    return basis;
-    //}
+    valarray<float> hex_basis(float size, float th)
+    {
+        if (size <= 0) {
+            throw "size must be > 0";
+        }
+        const float l = 2.0f*sin(PI/3.0f);
+        valarray<float> basis(4);
+        basis[col(0)] = angle_to_vec(th);
+        basis[col(1)] = angle_to_vec(th+PI/3.0f);
+        basis *= size*l;
+        return basis;
+    }
 }

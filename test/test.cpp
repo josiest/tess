@@ -5,8 +5,10 @@
 #include <vector>       // vector
 #include <functional>   // function
 #include <array>        // array
-#include <valarray>     // valarray, abs(valarray)
+#include <valarray>     // {valarray, abs(valarray), begin(valarray),
+                        //  end(valarray)}
 #include <sstream>      // stringstream
+#include <numeric>      // inner_product
 
 using namespace hexes;
 using namespace std::literals::string_literals;
@@ -192,50 +194,92 @@ void test_row_and_col(ostream& out)
     }
 }
 
-/*void test_hex_basis(ostream& out)
- *{
- *    const float num_tests = 3;
- *    array<float, num_tests> sizes{
- *        0.3f,    1.0f,  5.3f
- *    };
- *    array<float, num_tests> angles{
- *        0.0f, PI/6.0f, 33.4f
- *    };
- *
- *    array<valarray<float>, num_tests> expected_vecs{
- *        {           0.3f,     0.15f,     0.0f, 0.259808f},
- *        {sqrt(3.0f)/2.0f,      0.0f,     0.0f,      1.0f},
- *        {      -2.12855f, -5.26778f, 4.85379f, 0.583519f}
- *    };
- *    for (auto vec : expected_vecs) {
- *        vec *= 2.0f*sin(PI/3.0f);
- *    }
- *
- *    out << "Testing hex_basis\n";
- *
- *    bool failed = false;
- *    bool caught = false;
- *    for (int i = 0; i < num_tests; ++i) {
- *        auto size = size[i];
- *        auto th = angles[i];
- *        auto expected = expected_vecs[i];
- *
- *        auto actual = hex_basis(size, th);
- *
- *        if (abs(actual-expected) > EPS) {
- *            failed = true;
- *            out << "hex_basis(" << size << ", " << th << ") gave a basis of "
- *                << vecstr(actual) << "; expected " << vectstr(expected)
- *                << "\n";
- *        }
- *    }
- *}
- */
+void test_hex_basis(ostream& out)
+{
+    // testing hex_basis with good values
+
+    constexpr size_t num_tests = 4;
+    array<float, num_tests> sizes{
+        0.3f,    1.0f,  5.3f,          100.0f
+    };
+    array<float, num_tests> angles{
+        0.0f, PI/6.0f, 33.4f, -PI/sqrt(47.0f)
+    };
+
+    array<valarray<float>, num_tests> expected_vecs{
+        valarray<float>{           0.3f,     0.15f,      0.0f, 0.259808f},
+        valarray<float>{sqrt(3.0f)/2.0f,      0.0f,      0.5f,      1.0f},
+        valarray<float>{      -2.12855f, -5.26778f,  4.85379f, 0.583519f},
+        valarray<float>{       89.6829f,  83.1525f, -44.2368f,  55.5488f}
+    };
+    for (auto& vec : expected_vecs) {
+        vec *= 2.0f*sin(PI/3.0f);
+    }
+    out << "Testing hex_basis\n";
+    if (abs(expected_vecs[0][0]-0.3f) <= 0.01f) {
+        out << "\texpected_vecs weren't mutated!\n";
+        return;
+    }
+
+    bool failed = false;
+    for (size_t i = 0; i < num_tests; ++i) {
+        auto size = sizes[i];
+        auto th = angles[i];
+        auto expected = expected_vecs[i];
+
+        valarray<float> actual;
+        try {
+            actual = hex_basis(size, th);
+        }
+        catch (...) {
+            failed = true;
+            out << "\thex_basis(" << size << ", " << th << ") threw an "
+                << "exception; excpected " << vecstr(expected) << "\n";
+            continue;
+        }
+
+        valarray<float> diff = abs(actual-expected);
+        auto mag = inner_product(begin(diff), end(diff), begin(diff), 0.0f);
+        if (mag > EPS) {
+            failed = true;
+            out << "\thex_basis(" << size << ", " << th << ") gave a basis of "
+                << vecstr(actual) << "; expected " << vecstr(expected)
+                << "\n";
+        }
+    }
+
+    // test hex_basis for bad input
+
+    array<float, 2> bad_sizes{0.0f, -2.1f};
+
+    for (int i = 0; i < 2; ++i) {
+
+        bool caught = false;
+        valarray<float> actual;
+        try {
+            actual = hex_basis(bad_sizes[i], angles[i]);
+        }
+        catch (...) {
+            caught = true;
+        }
+        if (!caught) {
+            failed = true;
+            out << "\thex_basis" << bad_sizes[i] << ", " << angles[i]
+                << ") gave a basis of " << vecstr(actual) << "; expected an "
+                << "exception\n";
+        }
+    }
+
+    // Wrap up
+    if (!failed) {
+        out << "\tTest Passed!\n";
+    }
+}
 
 int main()
 {
     vector<test_func> tests{
-        test_Hex, test_angle_to_vec, test_row_and_col
+        test_Hex, test_angle_to_vec, test_row_and_col, test_hex_basis
     };
 
     for (auto test : tests) {
