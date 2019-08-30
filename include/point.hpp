@@ -6,6 +6,7 @@
 namespace hexes {
     struct Point {
         float x, y;
+        Point(float x, float y);
         float magnitude() const noexcept;
     };
 

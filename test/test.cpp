@@ -200,19 +200,20 @@ void test_hex_basis(ostream& out)
 {
     // testing hex_basis with good values
 
-    constexpr size_t num_tests = 4;
+    constexpr size_t num_tests = 5;
     array<float, num_tests> sizes{
-        0.3f,    1.0f,  5.3f,          100.0f
+        0.3f,    1.0f,  5.3f,          100.0f,  15.0f
     };
     array<float, num_tests> angles{
-        0.0f, PI/6.0f, 33.4f, -PI/sqrt(47.0f)
+        0.0f, PI/6.0f, 33.4f, -PI/sqrt(47.0f), -77.2f
     };
 
     array<valarray<float>, num_tests> expected_vecs{
         valarray<float>{           0.3f,     0.15f,      0.0f, 0.259808f},
         valarray<float>{sqrt(3.0f)/2.0f,      0.0f,      0.5f,      1.0f},
         valarray<float>{      -2.12855f, -5.26778f,  4.85379f, 0.583519f},
-        valarray<float>{       89.6829f,  83.1525f, -44.2368f,  55.5488f}
+        valarray<float>{       89.6829f,  83.1525f, -44.2368f,  55.5488f},
+        valarray<float>{      -3.43397f,  10.9284f, -14.6016f, -10.2747f}
     };
     for (auto& vec : expected_vecs) {
         vec *= 2.0f*sin(PI/3.0f);
@@ -285,7 +286,7 @@ void test_Grid(ostream& out)
     bool failed = false;
     bool caught = false;
     try {
-        Grid(-1.0f, HexType::FLAT);
+        Grid(-1.0f, HexType::Flat);
     }
     catch (...) {
         caught = true;
@@ -330,7 +331,7 @@ void test_hex_to_cartesian(ostream& out)
     // testing hex_to_cartesian with good input
     constexpr int num_tests = 4;
     array<Grid, num_tests> grids{
-        Grid(1.0f, HexType::POINTED), Grid(0.21f, HexType::FLAT),
+        Grid(1.0f, HexType::Pointed), Grid(0.21f, HexType::Flat),
         Grid(3.87f, PI/sqrt(71.0f)), Grid(73.0f, -13.4f, 15.0f, -77.2f)
     };
     array<Hex, num_tests> hexes{
@@ -362,11 +363,66 @@ void test_hex_to_cartesian(ostream& out)
     }
 }
 
+void test_vertices(ostream& out)
+{
+    constexpr int num_tests = 4;
+    array<Grid, num_tests> grids{
+        Grid(1.0f, HexType::Pointed), Grid(13.13f, HexType::Flat),
+        Grid(20.0f, 4.0f*PI/5.0f), Grid(90.0f, 70.0f, 0.11f, 413.33f)
+    };
+    array<Hex, num_tests> hexes{
+        Hex(0.0f, 0.0f), Hex(1.0f, 1.0f), Hex(-0.3f, 74.5f), Hex(-13.0f, -2.0f)
+    };
+    array<vector<Point>, num_tests> expected_vertices{
+        vector<Point>{
+            Point(sqrt(3.0f)/2.0f, 0.5f), Point(0.0f, 1.0f),
+            Point(-sqrt(3.0f)/2.0f, 0.5f), Point(-sqrt(3.0f)/2.0f, -0.5f),
+            Point(0.0f, -1.0f), Point(sqrt(3.0f)/2.0f, -0.5f)
+        },
+        vector<Point>{
+            Point(26.26f, 45.4837f), Point(13.13f, 45.4837f),
+            Point(6.565f, 34.1127f), Point(13.13f, 22.7418f),
+            Point(26.26f, 22.7418f), Point(32.825f, 34.1127f)
+        },
+        vector<Point>{
+            Point(-2369.12f, -1053.71f), Point(-2360.99f, -1071.98f),
+            Point(-2341.1f, -1074.07f), Point(-2329.34f, -1057.89f),
+            Point(-2337.47f, -1039.62f), Point(-2357.36f, -1037.53f)
+        },
+        vector<Point>{
+            Point(89.1935f, 72.4578f), Point(89.2273f, 72.5625f),
+            Point(89.1536f, 72.6441f), Point(89.0461f, 72.6211f),
+            Point(89.0122f, 72.5165f), Point(89.0859f, 72.4348f)
+        }
+    };
+
+    out << "Testing grid.vertices\n";
+    bool failed = false;
+
+    for (int i = 0; i < num_tests; ++i) {
+        auto actual = grids[i].vertices(hexes[i]);
+        auto expected = expected_vertices[i];
+
+        for (size_t j = 0; j < actual.size(); ++j) {
+            if ((actual[j]-expected[j]).magnitude() > EPS) {
+                failed = true;
+                out << "\tComponent " << j << " in grid.vertices(" << hexes[i]
+                    << ") is " << actual[j] << "; expected " << expected[j]
+                    << "\n";
+            }
+        }
+    }
+
+    if (!failed) {
+        out << "\tTest Passed!\n";
+    }
+}
+
 int main()
 {
     vector<test_func> tests{
         test_Hex, test_angle_to_vec, test_row_and_col, test_hex_basis,
-        test_Grid, test_hex_to_cartesian
+        test_Grid, test_hex_to_cartesian, test_vertices
     };
 
     for (auto test : tests) {

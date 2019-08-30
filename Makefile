@@ -16,6 +16,15 @@ OBJECTS = $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 # include all headers from the include folder
 INC = -I include
 
+# default make
+TARGET = hexes
+LIBDIR = lib
+
+$(TARGET): $(OBJECTS)
+	@mkdir -p $(LIBDIR)
+	@echo " ar rcs $(LIBDIR)/libhexes.a $(OBJECTS)"; \
+		ar rcs $(LIBDIR)/libhexes.a $(OBJECTS)
+
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@mkdir -p $(BUILDDIR)
 	@echo " $(CC) $(CFLAGS) $(INC) -c -o $@ $<"; \
@@ -25,7 +34,7 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 
 clean:
 	@echo " Cleaning...";
-	@echo " $(RM) -r $(BUILDDIR) "; $(RM) -r $(BUILDDIR)
+	@echo " $(RM) -r $(BUILDDIR) $(LIBDIR)"; $(RM) -r $(BUILDDIR) $(LIBDIR)
 
 test: $(OBJECTS)
 	$(CC) $(CFLAGS) test/test.cpp $(SOURCES) $(INC) -o bin/test

@@ -4,6 +4,8 @@
 using namespace std;
 
 namespace hexes {
+    Point::Point(float x_, float y_) :x(x_), y(y_) {}
+
     float Point::magnitude() const noexcept
     {
         return sqrt(x*x + y*y);
