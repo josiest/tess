@@ -1,5 +1,5 @@
-#ifndef HEXES_GRID_H
-#define HEXES_GRID_H
+#ifndef HEXES_GRID_HPP
+#define HEXES_GRID_HPP
 
 #include "hex.hpp"      // Hex
 #include "point.hpp"    // Point
@@ -14,9 +14,10 @@ namespace hexes {
      */
     class Grid {
         std::valarray<float> origin;
-        float unit_size;
+        float _unit_size;
         float offset;
         std::valarray<float> basis;
+        std::valarray<float> inv_basis;
     public:
         /** Construct a grid with a given origin, unit size and offset angle.
          *
@@ -59,12 +60,30 @@ namespace hexes {
          */
         Point hex_to_cartesian(const Hex&) const noexcept;
 
+        /** Convert a cartesian coordinate (in global space) to a hex coordinate
+         *
+         * Parameters:
+         *  x, y - the coordinate to convert
+         */
+        Hex cartesian_to_hex(float x, float y) const noexcept;
+
+        /** Convert a cartesian coordinate (in global space) to a hex coordinate
+         *
+         * Parameters:
+         *  p - the coordinate to convert
+         */
+        Hex cartesian_to_hex(const Point& p) const noexcept;
+
         /** Give the cartesian coordinates of each vertex of a hex.
          *
          * Parameters:
          *  h - the hex coordinate to get the vertices of
          */
         std::vector<Point> vertices(const Hex&) const noexcept;
+
+        /** Get the unit size of the grid
+         */
+        float unit_size() const noexcept;
     };
 }
 

@@ -8,33 +8,37 @@ using namespace std;
 namespace hexes {
 
     Grid::Grid(float x, float y, float size, float th)
-        :origin{x, y}, unit_size(size), offset(th),
-        basis(hex_basis(size, th)) {}
+        :origin{x, y}, _unit_size(size), offset(th),
+        basis(hex_basis(size, th)), inv_basis(inv_hex_basis(size, th)) {}
 
     Grid::Grid(float size, float th)
-        :origin{0.0f, 0.0f}, unit_size(size), offset(th),
-        basis(hex_basis(size, th)) {}
+        :origin{0.0f, 0.0f}, _unit_size(size), offset(th),
+        basis(hex_basis(size, th)), inv_basis(inv_hex_basis(size, th)) {}
 
     Grid::Grid(float size, HexType T)
-        :origin{0.0f, 0.0f}, unit_size(size),
+        :origin{0.0f, 0.0f}, _unit_size(size),
         offset(T == HexType::Pointed? 0.0f : PI/6.0f),
-        basis(hex_basis(size, T == HexType::Pointed? 0.0f : PI/6.0f)) {}
+        basis(hex_basis(size, T == HexType::Pointed? 0.0f : PI/6.0f)),
+        inv_basis(inv_hex_basis(size, T == HexType::Pointed? 0.0f : PI/6.0f)) {}
 
     Point Grid::hex_to_cartesian(const Hex& h) const noexcept
     {
-        // hex as a 2d vector v
-        valarray<float> v{h.q, h.r};
+        // multiply basis with hex as a 2d vector v
+        valarray<float> p(matvec_mul(basis, valarray<float>{h.q, h.r}));
+        p += origin;
+        return Point{p[0], p[1]};
+    }
 
-        // dot the first row with v to get x
-        auto s = valarray<float>(basis[row(0)]*v);
-        float x = accumulate(begin(s), end(s), 0.0f);
+    Hex Grid::cartesian_to_hex(float x, float y) const noexcept
+    {
+        // multiply inverse basis with point after taking origin into account
+        valarray<float> p(matvec_mul(inv_basis, valarray<float>{x, y}-origin));
+        return Hex(p[0], p[1]);
+    }
 
-        // dot the second row with v to get y
-        s = valarray<float>(basis[row(1)]*v);
-        float y = accumulate(begin(s), end(s), 0.0f);
-
-        // add the origin
-        return Point{x+origin[0], y+origin[1]};
+    Hex Grid::cartesian_to_hex(const Point& p) const noexcept
+    {
+        return cartesian_to_hex(p.x, p.y);
     }
 
     vector<Point> Grid::vertices(const Hex& h) const noexcept
@@ -48,12 +52,16 @@ namespace hexes {
             float th = offset + (2*i + 1)*PI/6.0f;
 
             auto v = angle_to_vec(th); // unit vector equivalent of theta
-            v *= unit_size;
+            v *= _unit_size;
             v[0] += center.x;
             v[1] += center.y;
 
             verts.emplace_back(v[0], v[1]);
         }
         return verts;
+    }
+
+    float Grid::unit_size() const noexcept {
+        return _unit_size;
     }
 }

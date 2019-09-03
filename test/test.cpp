@@ -2,21 +2,26 @@
 #include "math.hpp"
 #include "grid.hpp"
 #include "point.hpp"
+
+#include <vector>
+#include <array>
+#include <valarray>
+
 #include <iostream>     // ostream, cout
 #include <cmath>        // sqrt
-#include <vector>       // vector
 #include <functional>   // function
-#include <array>        // array
-#include <valarray>     // {valarray, abs(valarray), begin(valarray),
-                        //  end(valarray)}
 #include <sstream>      // stringstream
 #include <numeric>      // inner_product
+#include <variant>      // variant, get, get_if
 
 using namespace hexes;
 using namespace std::literals::string_literals;
 using namespace std;
 
 using test_func = function<void(ostream&)>;
+
+template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
 const float EPS = 0.01f;
 
@@ -200,35 +205,48 @@ void test_hex_basis(ostream& out)
 {
     // testing hex_basis with good values
 
-    constexpr size_t num_tests = 5;
+    constexpr size_t num_tests = 7;
     array<float, num_tests> sizes{
-        0.3f,    1.0f,  5.3f,          100.0f,  15.0f
+        0.3f,    1.0f,  5.3f,          100.0f,  15.0f,   23.0f,   20.0f
     };
     array<float, num_tests> angles{
-        0.0f, PI/6.0f, 33.4f, -PI/sqrt(47.0f), -77.2f
+        0.0f, PI/6.0f, 33.4f, -PI/sqrt(47.0f), -77.2f, PI/6.0f, PI/5.0f
     };
 
-    array<valarray<float>, num_tests> expected_vecs{
+    array<valarray<float>, num_tests> expected_bases{
         valarray<float>{           0.3f,     0.15f,      0.0f, 0.259808f},
         valarray<float>{sqrt(3.0f)/2.0f,      0.0f,      0.5f,      1.0f},
         valarray<float>{      -2.12855f, -5.26778f,  4.85379f, 0.583519f},
         valarray<float>{       89.6829f,  83.1525f, -44.2368f,  55.5488f},
-        valarray<float>{      -3.43397f,  10.9284f, -14.6016f, -10.2747f}
+        valarray<float>{      -3.43397f,  10.9284f, -14.6016f, -10.2747f},
+        valarray<float>{       19.9186f,      0.0f,     11.5f,     23.0f},
+        valarray<float>{       16.1803f, -2.09057f,  11.7557f,  19.8904f}
     };
-    for (auto& vec : expected_vecs) {
+    for (auto& vec : expected_bases) {
         vec *= 2.0f*sin(PI/3.0f);
     }
     out << "Testing hex_basis\n";
-    if (abs(expected_vecs[0][0]-0.3f) <= 0.01f) {
-        out << "\texpected_vecs weren't mutated!\n";
+    if (abs(expected_bases[0][0]-0.3f) <= 0.01f) {
+        out << "\texpected_bases weren't mutated!\n";
         return;
     }
 
+    array<valarray<float>, num_tests> expected_inv_bases{
+        valarray<float>{    1.9245f,   -1.11111f,        0.0f,    2.22222f},
+        valarray<float>{  0.666667f,        0.0f,  -0.333333f,    0.57735f},
+        valarray<float>{ 0.0138488f,   0.125021f,  -0.115196f, -0.0505173f},
+        valarray<float>{0.00370325f, -0.0055435f, 0.00294919f, 0.00597886f},
+        valarray<float>{-0.0304436f, -0.0323805f,  0.0432641f, -0.0101747f},
+        valarray<float>{ 0.0289855f,        0.0f, -0.0144928f,  0.0251022f},
+        valarray<float>{ 0.0331507f, 0.00348428f, -0.0195928f,  0.0269672f}
+    };
+
+    out << "Testing inv_hex_basis\n";
     bool failed = false;
     for (size_t i = 0; i < num_tests; ++i) {
         auto size = sizes[i];
         auto th = angles[i];
-        auto expected = expected_vecs[i];
+        auto expected = expected_bases[i];
 
         valarray<float> actual;
         try {
@@ -249,9 +267,29 @@ void test_hex_basis(ostream& out)
                 << vecstr(actual) << "; expected " << vecstr(expected)
                 << "\n";
         }
+
+        expected = expected_inv_bases[i];
+        try {
+            actual = inv_hex_basis(size, th);
+        }
+        catch (...) {
+            failed = true;
+            out << "\tinv_hex_basis(" << size << ", " << th << ") threw an "
+                << "exception; excpected " << vecstr(expected) << "\n";
+            continue;
+        }
+
+        diff = abs(actual-expected);
+        mag = inner_product(begin(diff), end(diff), begin(diff), 0.0f);
+        if (mag > EPS) {
+            failed = true;
+            out << "\tinv_hex_basis(" << size << ", " << th << ") gave a basis "
+                << "of " << vecstr(actual) << "; expected " << vecstr(expected)
+                << "\n";
+        }
     }
 
-    // test hex_basis for bad input
+    // test hex_basis and inv_hex_basis for bad input
 
     array<float, 2> bad_sizes{0.0f, -2.1f};
 
@@ -267,9 +305,23 @@ void test_hex_basis(ostream& out)
         }
         if (!caught) {
             failed = true;
-            out << "\thex_basis" << bad_sizes[i] << ", " << angles[i]
+            out << "\thex_basis(" << bad_sizes[i] << ", " << angles[i]
                 << ") gave a basis of " << vecstr(actual) << "; expected an "
                 << "exception\n";
+        }
+
+        caught = false;
+        try {
+            actual = inv_hex_basis(bad_sizes[i], angles[i]);
+        }
+        catch (...) {
+            caught = true;
+        }
+        if (!caught) {
+            failed = true;
+            out << "\tinv_hex_basis(" << bad_sizes[i] << ", " << angles[i]
+                << ") gave a basis of " << vecstr(actual) << "; expected an "
+                << "exception\n;";
         }
     }
 
@@ -418,11 +470,156 @@ void test_vertices(ostream& out)
     }
 }
 
+void test_cartesian_to_hex(ostream& out)
+{
+    constexpr int num_tests = 12;
+    array<Grid, num_tests> grids {
+        Grid(1.0f, HexType::Pointed), Grid(23.0f, HexType::Flat),
+        Grid(0.573f, 8.0f*PI/5.0f), Grid(20.0f, 17.14f, 5.39f, 2.3f*PI/3.3f),
+        Grid(10.0f, PI/5.0f), Grid(-20.0f, 50.0f, 100.0f, 9.0f*PI/7.0f),
+        Grid(10.0f, 10.0f, 3.0f, PI/2.0f), Grid(13.9, 3.0f*PI/7.0f),
+        Grid(72.3, PI/4.0f), Grid(0.5, PI/13.0f), Grid(1, 11.0f*PI/12.0f),
+        Grid(1.0f, HexType::Flat)
+    };
+    array<variant<pair<float, float>, Point>, num_tests> points {
+        pair<float, float>{0.0f, 0.0f}, Point(-100.0f, 100.0f),
+        pair<float, float>{-300.3f, -76.19f}, Point(13.0f, 15.0f),
+        pair<float, float>{43.0f, -31.0f}, Point(758.0f, 304.0f),
+        pair<float, float>{-17.4f, 29.3f}, Point(-70.0f, -80.0f),
+        pair<float, float>{800.0f, 0.0f}, pair<float, float>{-13.0f, -26.0f},
+        pair<float, float>{1.0f, -1.0f}, pair<float, float>{10.0f, 13.0f}
+    };
+    array<Hex, num_tests> expected {
+        Hex(0.0f, 0.0f), Hex(-2.89855f, 3.95949f), Hex(159.35f, -359.682f),
+        Hex(-0.18119f, 0.858794f), Hex(2.63494f, -3.35695f),
+        Hex(-5.44678f, 2.99932f), Hex(0.669842f, 6.08889f),
+        Hex(-5.09622f, 2.41934f), Hex(7.12532f, -5.21609f),
+        Hex(-7.00411f, -29.5112f), Hex(-0.942809f, 0.471405f),
+        Hex(6.66667f, 4.17222f)
+    };
+
+    out << "Testing grid.cartesian_to_hex\n";
+    bool failed = false;
+
+    for (int i = 0; i < num_tests; ++i) {
+        Hex actual;
+        stringstream ss;
+
+        std::visit(overloaded {
+
+            [&](Point& p) {
+                actual = grids[i].cartesian_to_hex(p);
+                ss << p;
+            },
+
+            [&](auto& p) {
+                auto pa = get<pair<float, float>>(points[i]);
+                actual = grids[i].cartesian_to_hex(pa.first, pa.second);
+                ss << "{" << pa.first << ", " << pa.second << "}";
+            }
+
+        }, points[i]);
+
+        if ((actual-expected[i]).magnitude() > EPS) {
+            out << "\tgrid.cartesian_to_hex(" << ss.str() << ") gave a hex of"
+                << actual << "; expected " << expected[i] << "\n";
+            failed = true;
+        }
+    }
+    if (!failed) {
+        out << "\tTest Passed!\n";
+    }
+}
+
+void test_hex_round(ostream& out)
+{
+    constexpr int num_tests = 5;
+    array<Hex, num_tests> hexes {
+        Hex(0.31f, 0.28f),  // {x, y} near 0 at mid
+        Hex(-32.2f, 28.3f), // {x<-1, y>1} ceiling
+        Hex(-0.51f, 1.27f), // {x, y} near -1, floor
+        // {x near 1: floor | y<-1: ceiling}
+        Hex(1.13f, 1.86f), 
+        // {x > 1: ceiling | y near 1: floor}
+        Hex(703.6f, -704.85f),
+    };
+    array<Hex, num_tests> expected {
+        Hex(0.0f, 0.0f),
+        Hex(-32.0f, 28.0f),
+        Hex(0.0f, 1.0f),
+        Hex(1.0f, 2.0f),
+        Hex(704.0f, -705.0f),
+    };
+
+    out << "Testing std::round(hex)\n";
+    bool failed = false;
+
+    for (int i = 0; i < num_tests; ++i) {
+        auto actual = round(hexes[i]);
+        if ((actual-expected[i]).magnitude() > EPS) {
+            out << "\tstd::round(" << hexes[i] << ") gave " << actual
+                << "; expected " << expected[i] << "\n";
+            failed = true;
+        }
+    }
+
+    if (!failed) {
+        out << "\tTest Passed!\n";
+    }
+}
+
+void test_matvec_mul(ostream& out)
+{
+    constexpr int num_tests = 8;
+    array<valarray<float>, num_tests> matrices {
+        valarray<float>{0.0f, 0.0f, 0.0f, 0.0f},
+        valarray<float>{1.0f, 0.0f, 0.0f, 1.0f},
+        valarray<float>{2.0f, 0.0f, 0.0f, 2.0f},
+        valarray<float>{-2.2f, -3.3f, 4.4f, 5.5f},
+        valarray<float>{-10.4f, -13.195f, -0.89f, -14.4f},
+        valarray<float>{33.0f, 33.0f, 33.0f, 33.0f},
+        inv_hex_basis(23.0f, PI/6.0f), inv_hex_basis(20.0f, PI/5.0f)
+    };
+    array<valarray<float>, num_tests> vecs {
+        valarray<float>{1.0f, 1.0f}, valarray<float>{0.0f, 0.0f},
+        valarray<float>{-3.3f, 18.95f}, valarray<float>{-0.12f, -0.73f},
+        valarray<float>{32.0f, 57.0f}, valarray<float>{24.0f, -17.5f},
+        valarray<float>{-100.0f, 100.0f}, valarray<float>{43.0f, -31.0f}
+    };
+    array<valarray<float>, num_tests> expected {
+        valarray<float>{0.0f, 0.0f}, valarray<float>{0.0f, 0.0f},
+        valarray<float>{-6.6f, 37.9f}, valarray<float>{2.673f, -4.543f},
+        valarray<float>{-1084.92f, -849.28f}, valarray<float>{214.5f, 214.5f},
+        valarray<float>{-2.89855f, 3.95949f}, valarray<float>{1.31747f, -1.67848f}
+    };
+
+    out << "Testing matvec_mul\n";
+    bool failed = false;
+
+    for (int i = 0; i < num_tests; ++i) {
+        auto actual = matvec_mul(matrices[i], vecs[i]);
+        valarray<float> diff(expected[i]-actual);
+        auto err = inner_product(begin(diff), end(diff), begin(diff), 0.0f);
+
+        if (err > EPS) {
+            failed = true;
+            out << "\tmatvec_mul(" << vecstr(matrices[i]) << ", "
+                << vecstr(vecs[i]) << ") gave " << vecstr(actual)
+                << "; expected " << vecstr(expected[i]) << "\n";
+        }
+    }
+
+    if (!failed) {
+        out << "\tTest Passed!\n";
+    }
+}
+
 int main()
 {
     vector<test_func> tests{
         test_Hex, test_angle_to_vec, test_row_and_col, test_hex_basis,
-        test_Grid, test_hex_to_cartesian, test_vertices
+        test_Grid, test_hex_to_cartesian, test_vertices, test_cartesian_to_hex, 
+        test_hex_round, test_matvec_mul
     };
 
     for (auto test : tests) {

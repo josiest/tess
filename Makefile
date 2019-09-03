@@ -2,7 +2,7 @@
 CC = g++
 
 # Compiler flags
-CFLAGS = -g -Wall
+CFLAGS = -g -Wall -std=c++1z
 
 # Create sources list
 SRCDIR = src
