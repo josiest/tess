@@ -27,6 +27,11 @@ namespace hexes {
     {
         return sqrt(q*q + r*r + s*s);
     }
+
+    bool operator==(const Hex& lhs, const Hex& rhs)
+    {
+        return lhs.q==rhs.q && lhs.r==rhs.r;
+    }
     
     Hex operator-(const Hex& lhs, const Hex& rhs)
     {

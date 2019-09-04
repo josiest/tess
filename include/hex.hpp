@@ -34,8 +34,18 @@ namespace hexes {
         float magnitude() const noexcept;
     };
 
+    bool operator==(const Hex&, const Hex&);
+
     Hex operator-(const Hex&, const Hex&);
     std::ostream& operator<<(std::ostream&, const Hex&);
+
+    inline static const Hex zero(0.0f, 0.0f);
+    inline static const Hex right_back(1.0f, -1.0f);
+    inline static const Hex up_back(0.0f, -1.0f);
+    inline static const Hex up_left(-1.0f, 0.0f);
+    inline static const Hex forward_left(-1.0f, 1.0f);
+    inline static const Hex forward_down(0.0f, 1.0f);
+    inline static const Hex right_down(1.0f, 0.0f);
 }
 
 namespace std {
