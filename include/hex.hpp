@@ -3,7 +3,7 @@
 
 #include <iostream>  // ostream
 
-namespace hexes {
+namespace hax {
     struct Hex {
         /** The components of the Hex */
         float q, r, s;
@@ -49,10 +49,10 @@ namespace hexes {
 }
 
 namespace std {
-    hexes::Hex round(const hexes::Hex&);
+    hax::Hex round(const hax::Hex&);
     
-    template <> struct hash<hexes::Hex> {
-        size_t operator()(const hexes::Hex& h) const {
+    template <> struct hash<hax::Hex> {
+        size_t operator()(const hax::Hex& h) const {
             hash<float> float_hash;
             size_t hq = float_hash(h.q);
             size_t hr = float_hash(h.r);

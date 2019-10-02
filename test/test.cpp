@@ -13,8 +13,9 @@
 #include <sstream>      // stringstream
 #include <numeric>      // inner_product
 #include <variant>      // variant, get, get_if
+#include <utility>      // pair, make_pair
 
-using namespace hexes;
+using namespace hax;
 using namespace std::literals::string_literals;
 using namespace std;
 
@@ -614,12 +615,42 @@ void test_matvec_mul(ostream& out)
     }
 }
 
+void test_hex_map(ostream& out)
+{
+    constexpr int num_tests = 5;
+    array<int, num_tests> radii { 0, 1, 3, 4, 73 };
+    array<pair<Hex, bool>, num_tests> coords {
+        make_pair(Hex(0.0f, 0.0f), true), make_pair(Hex(1.0f, 1.0f), false),
+        make_pair(Hex(0.0f, -3.0f), true), make_pair(Hex(0.0f, -3.0f), true),
+        make_pair(Hex(-100.0f, -200.0f), false)
+    };
+
+    out << "Testing grid.hex_map\n";
+    bool failed = false;
+
+    for (int i = 0; i < num_tests; ++i) {
+        auto set = Grid::hex_map(radii[i]);
+        auto [h, expected] = coords[i];
+        bool actual = set.find(h) != set.end();
+
+        if (expected != actual) {
+            failed = true;
+            out << "\t" << h << " is " << (actual? "" : "not") << " in the map;"
+                << " expected it " << (expected? "" : "not") << " to be.";
+        }
+    }
+
+    if (!failed) {
+        out << "\tTest Passed!\n";
+    }
+}
+
 int main()
 {
     vector<test_func> tests{
         test_Hex, test_angle_to_vec, test_row_and_col, test_hex_basis,
         test_Grid, test_hex_to_cartesian, test_vertices, test_cartesian_to_hex, 
-        test_hex_round, test_matvec_mul
+        test_hex_round, test_matvec_mul, test_hex_map
     };
 
     for (auto test : tests) {

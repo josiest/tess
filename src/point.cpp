@@ -3,7 +3,7 @@
 
 using namespace std;
 
-namespace hexes {
+namespace hax {
     Point::Point(float x_, float y_) :x(x_), y(y_) {}
 
     float Point::magnitude() const noexcept

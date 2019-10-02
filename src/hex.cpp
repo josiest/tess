@@ -9,7 +9,7 @@ using namespace std;
 
 const float EPS = 0.01f;
 
-namespace hexes {
+namespace hax {
     Hex::Hex() noexcept :q(0.0f), r(0.0f), s(0.0f) {}
 
     Hex::Hex(float q_, float r_) noexcept
@@ -46,7 +46,7 @@ namespace hexes {
 }
 
 namespace std {
-    hexes::Hex round(const hexes::Hex& h)
+    hax::Hex round(const hax::Hex& h)
     {
         // convert hex to valarray for easy operations
         valarray<float> v{h.q, h.r, h.s};
@@ -62,6 +62,6 @@ namespace std {
         auto i = distance(begin(dv), max_element(begin(dv), end(dv)));
         rv[i] -= accumulate(begin(rv), end(rv), 0.0f);
 
-        return hexes::Hex(rv[0], rv[1], rv[2]);
+        return hax::Hex(rv[0], rv[1], rv[2]);
     }
 }

@@ -5,7 +5,7 @@
 
 using namespace std;
 
-namespace hexes {
+namespace hax {
     valarray<float> angle_to_vec(float angle) noexcept
     {
         return valarray<float>{cos(angle), sin(angle)};

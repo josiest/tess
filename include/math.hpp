@@ -4,7 +4,7 @@
 #include <cmath>    // acos
 #include <valarray> // valarray, slice
 
-namespace hexes {
+namespace hax {
 
     /** pi constant */
     const float PI = std::acos(-1.0f);

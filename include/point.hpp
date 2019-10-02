@@ -3,7 +3,7 @@
 
 #include <ostream>
 
-namespace hexes {
+namespace hax {
     struct Point {
         float x, y;
         Point(float x, float y);
