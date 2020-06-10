@@ -1,3 +1,11 @@
+# project
 bin/
 build/
 lib/
+docs/
+
+# cmake
+*.cmake
+*.in
+CMakeFiles/
+CMakeCache.txt
