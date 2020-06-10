@@ -9,6 +9,9 @@ cmake_minimum_required(VERSION 3.8)
 set(CMAKE_CXX_STANDARD 17)
 project("hax")
 
+# include custom modules
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+
 # define project structure variables
 set(SOURCE_EXT "cpp")
 set(HEADER_EXT "hpp")

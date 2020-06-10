@@ -6,6 +6,8 @@
 
 find_package(Doxygen REQUIRED)
 
+message("docs binary dir: ${CMAKE_CURRENT_BINARY_DIR}")
+
 # define relevant paths for building documentation
 set(DOXYGEN_INPUT_DIR ${HAX_PUBLIC_HEADER_DIR})
 set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/doxygen)
@@ -28,3 +30,14 @@ add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
 
 # target for making doxygen files, depends on existence of doxygen index.html
 add_custom_target(Doxygen ALL DEPENDS ${DOXYGEN_INDEX_FILE})
+
+# set up sphinx
+find_package(Sphinx REQUIRED)
+set(SPHINX_SOURCE ${CMAKE_CURRENT_SOURCE_DIR})
+set(SPHINX_BUILD ${CMAKE_CURRENT_BINARY_DIR}/sphinx)
+file(MAKE_DIRECTORY ${SPHINX_BUILD})
+
+add_custom_target(Sphinx ALL
+    COMMAND ${SPHINX_EXECUTABLE} -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT "Compiling Sphinx files")
