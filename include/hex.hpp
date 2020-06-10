@@ -20,7 +20,7 @@ struct Hex {
      * \param q the first component of the axial coordinate.
      * \param r the second component of the axial coordinate.
      */
-    Hex(float, float) noexcept;
+    Hex(float q, float r) noexcept;
 
     /** Create a Hex from cube coordinates.
      *
@@ -30,7 +30,7 @@ struct Hex {
      *
      * \throws std::invalid_argument if q + r + s != 0
      */
-    Hex(float, float, float);
+    Hex(float q, float r, float s);
 
     /**
      * The magnitude of this hex as if it were a euclidean 3d vector

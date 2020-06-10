@@ -29,21 +29,21 @@ public:
      * \param x the x-coordinate of the cartesian origin.
      * \param y the y-coordinate of the cartesian origin.
      * \param size the unit size of the grid, a positive number.
-     * \param th the offset angle of the grid in radians.
+     * \param theta the offset angle of the grid in radians.
      *
      * \throws std::invalid_argument if size <= 0.
      */
-    Grid(float, float, float, float);
+    Grid(float x, float y, float size, float theta);
 
     /**
      * Construct a grid with a given unit size and offset angle.
      *
      * \param size the unit size of the grid, a positive number.
-     * \param th the offset angle of the grid in radians.
+     * \param theta the offset angle of the grid in radians.
      *
      * \throws std::invalid_argument if size <= 0.
      */
-    Grid(float, float);
+    Grid(float size, float theta);
 
     /**
      * Construct a grid with a given unit size and hex type.
@@ -53,7 +53,7 @@ public:
      *
      * \throws std::invalid_argument if size <= 0.
      */
-    Grid(float, HexType);
+    Grid(float size, HexType hextype);
 
     /**
      * Get the unit size of this grid.
@@ -70,7 +70,7 @@ public:
      * \post change this grid's unit size to size.
      * \throws std::invalid_argument if size <= 0.
      */
-    void unit_size(float);
+    void unit_size(float size);
 
     /**
      * Get the offset angle of this grid.
@@ -86,7 +86,7 @@ public:
      * \param theta the offset angle in radians.
      * \post change this grid's offset angle to theta.
      */
-    void offset(float) noexcept;
+    void offset(float theta) noexcept;
 
     /**
      * Get the global origin of this grid.
@@ -103,7 +103,7 @@ public:
      * \param y the y-component of the cartesian origin.
      * \post change this grid's origin to (x, y)
      */
-    void origin(float, float) noexcept;
+    void origin(float x, float y) noexcept;
 
     // TODO: delete: Grid class should be immutable
     /**
@@ -112,7 +112,7 @@ public:
      * \param p the cartesian origin.
      * \post change this grid's origin to p
      */
-    void origin(const Point&) noexcept;
+    void origin(const Point& p) noexcept;
 
     /**
      * Convert a hex coordinate to cartesian.
@@ -121,7 +121,7 @@ public:
      * \return the cartesian representation of the hex coordinate
      *         with respect to global origin.
      */
-    Point hex_to_cartesian(const Hex&) const noexcept;
+    Point hex_to_cartesian(const Hex& h) const noexcept;
 
     /**
      * Convert a cartesian coordinate to a hex coordinate
@@ -150,7 +150,7 @@ public:
      *         representing the vertices of this hex coordinate. Vertices appear
      *         in clockwise order starting from upper-right-most vertex.
      */
-    std::vector<Point> vertices(const Hex&) const noexcept;
+    std::vector<Point> vertices(const Hex& h) const noexcept;
 
     // TODO: delete: a pointless function? or at least rename
     /**
@@ -160,7 +160,7 @@ public:
      * \return a set of all hex coordinates in the map.
      * \throws std::illegal_argument if r < 0
      */
-    static std::unordered_set<Hex> hex_map(int);
+    static std::unordered_set<Hex> hex_map(int r);
 };
 }
 
