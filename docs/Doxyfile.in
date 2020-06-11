@@ -4,3 +4,5 @@ OUTPUT_DIRECTORY    = "@DOXYGEN_OUTPUT_DIR@"
 
 FILE_PATTERNS       = *.@HEADER_EXT@ \
                       *.@SOURCE_EXT@
+
+GENERATE_XML        = YES
