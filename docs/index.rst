@@ -22,5 +22,11 @@ Indices and tables
 Docs
 ====
 
+.. .. doxygenclass:: hax::Grid
+      :members:
+   
+   .. doxygenstruct:: hax::Hex
+      :members:
+
 .. doxygenstruct:: hax::Point
    :members:

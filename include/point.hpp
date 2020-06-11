@@ -5,12 +5,11 @@
 
 namespace hax {
 
-// TODO: make field type a generic type
-struct Point {
-    // TODO: make private:
-    //  Point should be immutable and prevent rep exposure
-    float x, y;
+class Point {
+    float const _x;
+    float const _y;
 
+public:
     /**
      * Create a representation of a cartesian point at (x, y)
      *
@@ -18,14 +17,28 @@ struct Point {
      * \param y the y-component of the cartesian point.
      */
     Point(float x, float y);
-    // TODO: rename to norm, or overload std::abs
+
     /**
-     * Calculate the norm of this point.
+     * Get the x-component.
      *
-     * \return the 2D euclidean norm of this point.
+     * \return the x-component of this point.
      */
-    float magnitude() const noexcept;
+    inline float x() const noexcept { return _x; }
+
+    /**
+     * Get the y-component.
+     *
+     * \return the y-component of this point.
+     */
+    inline float y() const noexcept { return _y; }
 };
+
+/**
+ * Calculate the norm of p.
+ *
+ * \return the 2D euclidean norm of p.
+ */
+float norm(const Point& p) noexcept;
 
 // TODO: document?
 Point operator-(const Point&, const Point&);

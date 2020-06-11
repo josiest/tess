@@ -7,7 +7,7 @@
 # set cmake and compiler options
 cmake_minimum_required(VERSION 3.8)
 set(CMAKE_CXX_STANDARD 17)
-project("hax")
+project(hax)
 
 # include custom modules
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
@@ -27,3 +27,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/docs)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "lib")
 add_library(hax ${HAX_SOURCES})
 target_include_directories(hax PUBLIC ${HAX_PUBLIC_HEADER_DIR})
+set(HAX_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/lib)
+
+# include testing
+add_subdirectory(${PROJECT_SOURCE_DIR}/test)
