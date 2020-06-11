@@ -28,5 +28,5 @@ Docs
    .. doxygenstruct:: hax::Hex
       :members:
 
-.. doxygenstruct:: hax::Point
+.. doxygenclass:: hax::Point
    :members:

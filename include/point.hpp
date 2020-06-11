@@ -5,6 +5,26 @@
 
 namespace hax {
 
+/**
+ * A represenatation of a 2D cartesian point.
+ *
+ * Points may be printed, added, subtracted and negated:
+ *
+ * \code{.cpp}
+ * Point const p1(1, 2);
+ * Point const p2(3, 4);
+ *
+ * std::cout << (p1+p2) << '\n';
+ * std::cout << (p1-p2) << '\n';
+ * std::cout << (-p1) << '\n';
+ * \endcode
+ *
+ * ```
+ * > (4.0, 6.0)
+ * > (-2.0, -2.0)
+ * > (-1.0, -2.0)
+ * ```
+ */
 class Point {
     float const _x;
     float const _y;
@@ -40,7 +60,8 @@ public:
  */
 float norm(const Point& p) noexcept;
 
-// TODO: document?
+Point operator+(const Point&, const Point&);
+Point operator-(const Point&);
 Point operator-(const Point&, const Point&);
 std::ostream& operator<<(std::ostream&, const Point&);
 
