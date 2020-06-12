@@ -13,21 +13,18 @@ project(hax)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 # define project structure variables
-set(SOURCE_EXT "cpp")
 set(HEADER_EXT "hpp")
-set(HAX_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
-set(HAX_PUBLIC_HEADER_DIR ${PROJECT_SOURCE_DIR}/include)
-file(GLOB HAX_SOURCES ${HAX_SOURCE_DIR}/*.${SOURCE_EXT})
-file(GLOB HAX_PUBLIC_HEADERS ${HAX_PUBLIC_HEADER_DIR}/*.${HEADER_EXT})
+set(HAX_HEADER_DIR ${PROJECT_SOURCE_DIR}/include)
+file(GLOB HAX_HEADERS ${HAX_HEADER_DIR}/*.${HEADER_EXT})
 
 # include the documentation
 add_subdirectory(${PROJECT_SOURCE_DIR}/docs)
 
 # setup the library
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "lib")
-add_library(hax ${HAX_SOURCES})
-target_include_directories(hax PUBLIC ${HAX_PUBLIC_HEADER_DIR})
-set(HAX_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/lib)
+add_library(hax INTERFACE)
+target_include_directories(hax INTERFACE ${HAX_HEADER_DIR})
+#set(HAX_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/lib)
 
 # include testing
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)

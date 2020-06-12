@@ -8,7 +8,7 @@ find_package(Doxygen REQUIRED)
 find_package(Sphinx REQUIRED)
 
 # define variables for doxygen project structure
-set(DOXYGEN_INPUT_DIR ${HAX_PUBLIC_HEADER_DIR})
+set(DOXYGEN_INPUT_DIR ${HAX_HEADER_DIR})
 set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/doxygen)
 set(DOXYGEN_INDEX_FILE ${DOXYGEN_OUTPUT_DIR}/xml/index.xml)
 set(DOXYFILE_IN ${PROJECT_SOURCE_DIR}/docs/Doxyfile.in)
@@ -23,7 +23,7 @@ file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT_DIR})
 # command for compiling doxygen files
 add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
     COMMAND Doxygen::doxygen ${DOXYFILE_OUT}        # run doxygen with Doxyfile
-    DEPENDS ${HAX_PUBLIC_HEADERS}                   # depends on headers
+    DEPENDS ${HAX_HEADERS}                          # depends on headers
     MAIN_DEPENDENCY ${DOXYFILE_OUT} ${DOXYFILE_IN}  # depends on Doxyfile.in
     COMMENT "Compiling Doxygen files"
     VERBATIM)
