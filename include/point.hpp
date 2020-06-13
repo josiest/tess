@@ -9,7 +9,7 @@
 namespace hax {
 
 /**
- * A represenatation of a 2D cartesian point.
+ * A represenatation of a cartesian point.
  *
  * Points may be printed, added, subtracted and negated:
  *
@@ -75,12 +75,27 @@ template<typename T>
          * \return the y-component of this point.
          */
         inline T y() const noexcept { return _y; }
+
+        /** The zero point */
+        static Point<T> constexpr zero{0, 0};
+
+        /** The point (1, 0) */
+        static Point<T> constexpr right{1, 0};
+
+        /** The point (-1, 0) */
+        static Point<T> constexpr left{-1, 0};
+
+        /** The point (0, -1) */
+        static Point<T> constexpr up{0, -1};
+
+        /** The point (0, 1) */
+        static Point<T> constexpr down{0, 1};
     };
     
 /**
  * Calculate the norm of p.
  *
- * \return the 2D euclidean norm of p as a double.
+ * \return the euclidean norm of p as a double.
  */
 template<typename T>
     double norm(const Point<T>& p) noexcept
@@ -91,12 +106,23 @@ template<typename T>
 /**
  * Calculate the norm of p.
  *
- * \return the 2D euclidean norm of p as a float.
+ * \return the euclidean norm of p as a float.
  */
 template<typename T>
     double normf(const Point<T>& p) noexcept
     {
         return sqrtf(p.x()*p.x() + p.y()*p.y());
+    }
+
+/**
+ * Calculate the square norm of p.
+ *
+ * \return the dot product p.p
+ */
+template<typename T>
+    T sqnorm(const Point<T>& p) noexcept
+    {
+        return p.x()*p.x() + p.y()*p.y();
     }
 
 template<typename T>

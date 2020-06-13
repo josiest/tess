@@ -7,18 +7,22 @@
 find_package(Doxygen REQUIRED)
 find_package(Sphinx REQUIRED)
 
-# define variables for doxygen project structure
+# define project structure variables
+set(HEADER_EXT "hpp")
+file(GLOB HAX_HEADERS ${HAX_HEADER_DIR}/*.${HEADER_EXT})
+
 set(DOXYGEN_INPUT_DIR ${HAX_HEADER_DIR})
 set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/doxygen)
+
+# explicitly make the directory so it won't shout warnings at us
+file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT_DIR})
 set(DOXYGEN_INDEX_FILE ${DOXYGEN_OUTPUT_DIR}/xml/index.xml)
+
 set(DOXYFILE_IN ${PROJECT_SOURCE_DIR}/docs/Doxyfile.in)
 set(DOXYFILE_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
 # replace @variables@ in Doxyfile with their respective values
 configure_file(${DOXYFILE_IN} ${DOXYFILE_OUT} @ONLY)
-
-# explicitly make the directory so it won't shout warnings at us
-file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT_DIR})
 
 # command for compiling doxygen files
 add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}

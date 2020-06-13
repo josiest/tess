@@ -12,10 +12,8 @@ project(hax)
 # include custom modules
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
-# define project structure variables
-set(HEADER_EXT "hpp")
+# global project structure
 set(HAX_HEADER_DIR ${PROJECT_SOURCE_DIR}/include)
-file(GLOB HAX_HEADERS ${HAX_HEADER_DIR}/*.${HEADER_EXT})
 
 # include the documentation
 add_subdirectory(${PROJECT_SOURCE_DIR}/docs)
