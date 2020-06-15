@@ -42,11 +42,7 @@ template<typename T>
     
     public:
         /**
-         * Create a representation of a cartesian point at (x, y)
-         *
-         * \param x the x-component of the cartesian point.
-         * \param y the y-component of the cartesian point.
-         *
+         * Create a representation of a cartesian point at (x, y).
          * \throws std::invalid_argument if x or y are NaN
          */
         Point(T x, T y) :_x(x), _y(y)
@@ -62,40 +58,32 @@ template<typename T>
             }
         }
     
-        /**
-         * Get the x-component.
-         *
-         * \return the x-component of this point.
-         */
+        /** The x component of this point. */
         inline T x() const noexcept { return _x; }
     
-        /**
-         * Get the y-component.
-         *
-         * \return the y-component of this point.
-         */
+        /** The y component of this point. */
         inline T y() const noexcept { return _y; }
 
         /** The zero point */
         static Point<T> constexpr zero{0, 0};
 
-        /** The point (1, 0) */
+        /** The unit point associated with the direction "right" */
         static Point<T> constexpr right{1, 0};
 
-        /** The point (-1, 0) */
+        /** The unit point associated with the direction "left" */
         static Point<T> constexpr left{-1, 0};
 
-        /** The point (0, -1) */
+        /** The unit point associated with the direction "up" */
         static Point<T> constexpr up{0, -1};
 
-        /** The point (0, 1) */
+        /** The unit point associated with the direction "down" */
         static Point<T> constexpr down{0, 1};
     };
     
 /**
- * Calculate the norm of p.
+ * Calculate the 2D euclidean norm of p as a double.
  *
- * \return the euclidean norm of p as a double.
+ * This is equivalent to \f$\sqrt{p_x^2 + p_y^2}\f$
  */
 template<typename T>
     double norm(const Point<T>& p) noexcept
@@ -104,9 +92,9 @@ template<typename T>
     }
 
 /**
- * Calculate the norm of p.
+ * Calculate the euclidean norm of p as a float.
  *
- * \return the euclidean norm of p as a float.
+ * This is equivalent to \f$\sqrt{p_x^2 + p_y^2}\f$
  */
 template<typename T>
     double normf(const Point<T>& p) noexcept
@@ -115,9 +103,9 @@ template<typename T>
     }
 
 /**
- * Calculate the square norm of p.
+ * Calculate the squared norm of p.
  *
- * \return the dot product p.p
+ * This is equivalent to \f$p \cdot p\f$ or \f$p_x^2 + p_y^2\f$.
  */
 template<typename T>
     T sqnorm(const Point<T>& p) noexcept

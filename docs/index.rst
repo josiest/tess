@@ -13,14 +13,31 @@ on the matter.
    :caption: Contents:
 
 math functions
-==============
+--------------
 .. doxygenfunction:: hax::norm(const Point<T> &p) noexcept
-.. doxygenfunction:: hax::norm(const Hex<T> &h) noexcept
-.. doxygenfunction:: hax::normf(const Point<T> &p) noexcept
-.. doxygenfunction:: hax::normf(const Hex<T> &h) noexcept
 
+|
+
+.. doxygenfunction:: hax::normf(const Point<T> &p) noexcept
+
+|
+
+.. doxygenfunction:: hax::sqnorm(const Point<T> &p) noexcept
+
+|
+
+.. doxygenfunction:: hax::hex_norm(const Hex<T> &h) noexcept
+
+|
+
+.. doxygenfunction:: hax::hex_round(const Hex<R> &h) noexcept
 
 point
-=====
+-----
 .. doxygenclass:: hax::Point
+   :members:
+
+hex
+---
+.. doxygenclass:: hax::Hex
    :members:
