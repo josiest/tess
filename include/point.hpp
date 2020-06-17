@@ -45,7 +45,7 @@ template<typename T>
          * Create a representation of a cartesian point at (x, y).
          * \throws std::invalid_argument if x or y are NaN
          */
-        Point(T x, T y) :_x(x), _y(y)
+        constexpr Point(T x, T y) :_x(x), _y(y)
         {
             static_assert(std::is_arithmetic<T>::value,
                           "T must be a numeric type");
@@ -74,10 +74,10 @@ template<typename T>
         static Point<T> constexpr left{-1, 0};
 
         /** The unit point associated with the direction "up" */
-        static Point<T> constexpr up{0, -1};
+        static Point<T> constexpr up{0, 1};
 
         /** The unit point associated with the direction "down" */
-        static Point<T> constexpr down{0, 1};
+        static Point<T> constexpr down{0, -1};
     };
     
 /**
@@ -129,6 +129,11 @@ template<typename T>
     Point<T> operator-(const Point<T>& p, const Point<T>& q)
     {
         return p + (-q);
+    }
+
+template<typename T>
+    bool operator==(const Point<T>& a, const Point<T>& b) {
+        return a.x() == b.x() && a.y() == b.y();
     }
 
 template<typename T>

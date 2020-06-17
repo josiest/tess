@@ -17,20 +17,13 @@ TEST(HexTest, AllIntComponentsZero) {
     EXPECT_EQ(hex_norm(hex), 0);
 
     auto const hexn = -hex;
-    EXPECT_EQ(hexn.q(), 0);
-    EXPECT_EQ(hexn.r(), 0);
-    EXPECT_EQ(hexn.s(), 0);
+    EXPECT_EQ(hexn, Hex<int>::zero);
 
     auto const hexa = hex+hex;
-    EXPECT_EQ(hexa.q(), 0);
-    EXPECT_EQ(hexa.r(), 0);
-    EXPECT_EQ(hexa.s(), 0);
+    EXPECT_EQ(hexa, Hex<int>::zero);
 
     auto const hexs = hex-hex;
-    EXPECT_EQ(hexs.q(), 0);
-    EXPECT_EQ(hexs.r(), 0);
-    EXPECT_EQ(hexs.s(), 0);
-
+    EXPECT_EQ(hexs, Hex<int>::zero);
 }
 
 TEST(HexTest, AllRealComponentsZero) {
@@ -213,7 +206,7 @@ TEST(HexTest, OneComponentInfinite) {
     EXPECT_TRUE(failed);
 }
 
-TEST(PointTest, OneComponentNaN) {
+TEST(HexTest, OneComponentNaN) {
     random_device seed;
     uniform_real_distribution<long double>
         dist(numeric_limits<long double>::min(),
@@ -229,7 +222,7 @@ TEST(PointTest, OneComponentNaN) {
     EXPECT_TRUE(failed);
 }
 
-TEST(PointTest, OneComponentNaNOneInfinite){
+TEST(HexTest, OneComponentNaNOneInfinite){
     bool failed = false;
     try {
         Hex<float> const h(0.0f/0.0f, numeric_limits<float>::infinity());
@@ -238,4 +231,48 @@ TEST(PointTest, OneComponentNaNOneInfinite){
         failed = true;
     }
     EXPECT_TRUE(failed);
+}
+
+TEST(HexTest, HexZero) {
+    Hex<int> expected{0, 0};
+    EXPECT_EQ(Hex<int>::zero, expected);
+}
+
+TEST(HexTest, HexLeftUp) {
+    Hex<int> expected{0, -1};
+    EXPECT_EQ(Hex<int>::left_up, expected);
+    EXPECT_EQ(expected.s(), 1);
+}
+
+TEST(HexTest, HexForwardLeft) {
+    Hex<short> expected{1, -1};
+    EXPECT_EQ(Hex<short>::forward_left, expected);
+    EXPECT_EQ(expected.s(), 0);
+}
+
+TEST(HexTest, HexForwardDown) {
+    Hex<long> expected{1, 0};
+    EXPECT_EQ(Hex<long>::forward_down, expected);
+    EXPECT_EQ(expected.s(), -1);
+}
+
+TEST(HexTest, HexRightDown) {
+    double const eps = 0.0001;
+    Hex<double> expected{0.0, 1.0};
+    EXPECT_LT(hex_norm(Hex<double>::right_down-expected), eps);
+    EXPECT_LT(abs(expected.s()+1.0), eps);
+}
+
+TEST(HexTest, HexBackRight) {
+    double const eps = 0.001;
+    Hex<float> expected{-1.0f, 1.0f};
+    EXPECT_LT(hex_norm(Hex<float>::back_right-expected), eps);
+    EXPECT_LT(abs(expected.s()), eps);
+}
+
+TEST(HexTest, HexBackUp) {
+    double const eps = 0.0001;
+    Hex<long double> expected{-1.0l, 0.0l};
+    EXPECT_LT(hex_norm(Hex<long double>::back_up-expected), eps);
+    EXPECT_LT(abs(expected.s()-1.0), eps);
 }

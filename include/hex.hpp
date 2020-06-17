@@ -48,7 +48,7 @@ template<typename T>
          * Create the hex <q, r, -q-r>.
          * \throws std::invalid_argument if q or r are infinite or NaN
          */
-        Hex(T q, T r)
+        constexpr Hex(T q, T r)
             :_q(q), _r(r)
         {
             static_assert(std::is_arithmetic<T>::value,
@@ -72,25 +72,25 @@ template<typename T>
         T s() const noexcept { return -_q-_r; }
 
         /** The zero hex */
-        static constexpr Hex zero{0, 0};
+        static Hex<T> constexpr zero{0, 0};
 
-        /** The hex associated with the direction "right and back" */
-        static constexpr Hex right_back{1, -1};
-
-        /** The hex associated with the direction "up and back" */
-        static constexpr Hex up_back{0, -1};
-
-        /** The hex associated with the direction "up and left" */
-        static constexpr Hex up_left{-1, 0};
+        /** The hex associated with the direction "left and up" */
+        static Hex<T> constexpr left_up{0, -1};
 
         /** The hex associated with the direction "forward and left" */
-        static constexpr Hex forward_left{-1, 1};
+        static Hex<T> constexpr forward_left{1, -1};
 
         /** The hex associated with the direction "forward and down" */
-        static constexpr Hex forward_down{0, 1};
+        static Hex<T> constexpr forward_down{1, 0};
 
         /** The hex associated with the direction "right and down" */
-        static constexpr Hex right_down{1, 0};
+        static Hex<T> constexpr right_down{0, 1};
+
+        /** The hex associated with the direction "back and right" */
+        static Hex<T> constexpr back_right{-1, 1};
+
+        /** The hex associated with the direction "back and up" */
+        static Hex<T> constexpr back_up{-1, 0};
     };
 
 /**

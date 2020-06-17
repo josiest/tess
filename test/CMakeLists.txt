@@ -9,5 +9,3 @@ endif()
 file(GLOB TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 add_executable(run_tests ${TEST_SOURCES})
 target_link_libraries(run_tests GTest::GTest GTest::Main hax)
-
-add_test(PointTest, run_tests)
