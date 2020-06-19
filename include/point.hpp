@@ -1,5 +1,5 @@
-#ifndef HEXES_POINT_H
-#define HEXES_POINT_H
+#ifndef HAX_POINT_H
+#define HAX_POINT_H
 
 #include <ostream>
 #include <type_traits>
@@ -57,6 +57,9 @@ template<typename T>
                 throw std::invalid_argument{"y must be a valid number"};
             }
         }
+
+        /** Create a copy of p. */
+        constexpr Point(const Point<T> &p) : _x{p.x()}, _y{p.y()} {}
     
         /** The x component of this point. */
         inline T x() const noexcept { return _x; }
@@ -132,7 +135,8 @@ template<typename T>
     }
 
 template<typename T>
-    bool operator==(const Point<T>& a, const Point<T>& b) {
+    bool operator==(const Point<T>& a, const Point<T>& b)
+    {
         return a.x() == b.x() && a.y() == b.y();
     }
 
@@ -144,4 +148,17 @@ template<typename T>
     }
 }
 
+namespace std {
+
+template <typename T>
+    struct hash<hax::Point<T>> {
+        size_t operator()(const hax::Point<T>& p) const {
+            hash<double> dhash;
+            size_t px = dhash((double)p.x());
+            size_t py = dhash((double)p.y());
+            return px ^ (py + 0x9e3779b9 + (px << 6) + (px >> 2));
+        }
+    };
+
+}
 #endif

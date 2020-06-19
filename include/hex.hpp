@@ -1,5 +1,5 @@
-#ifndef HEXES_HEX_HPP
-#define HEXES_HEX_HPP
+#ifndef HAX_HEX_HPP
+#define HAX_HEX_HPP
 
 #include <ostream>
 #include <type_traits>  // is_arithmetic
@@ -61,6 +61,9 @@ template<typename T>
                 throw std::invalid_argument{"r must be a valid number"};
             }
         }
+        
+        /** Construct a copy of hex */
+        constexpr Hex(const Hex<T>& hex) noexcept :_q{hex.q()}, _r{hex.r()} {}
 
         /** The q component of this hex. */
         T q() const noexcept { return _q; }

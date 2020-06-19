@@ -41,3 +41,8 @@ hex
 ---
 .. doxygenclass:: hax::Hex
    :members:
+
+basis
+-----
+.. doxygenclass:: hax::Basis
+   :members:
