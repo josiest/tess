@@ -32,6 +32,14 @@ math functions
 
 .. doxygenfunction:: hax::hex_round(const Hex<R> &h) noexcept
 
+|
+
+.. doxygenfunction:: hax::line
+
+|
+
+.. doxygenfunction:: hax::hex_range
+
 point
 -----
 .. doxygenclass:: hax::Point

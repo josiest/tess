@@ -135,10 +135,13 @@ template<typename I, typename R>
     }
 
 /**
- * Calculate the hex coordinates in a "straight" line from `a` to `b`.
+ * Calculate the hex coordinates in a "straight" line segment from `a` to `b`.
+ *
+ * The coordinates are calculated by finding the the nearest hex coordinates
+ * with integer components to the line segment between a and b.
  */
 template<typename I>
-    std::vector<Hex<I>> line(const Hex<I>& a, const Hex<I>& b)
+    std::vector<Hex<I>> line(const Hex<I>& a, const Hex<I>& b) noexcept
     {
         auto lerp = [](double a, double b, double t) {
             return a + (b - a) * t;
@@ -157,14 +160,22 @@ template<typename I>
 
 /**
  * Calculate the set of hex coordinates within radius `r` of `center`.
+ *
+ * \note A hex coordinate `a` is within radius `r` of `b` if
+ *       `hex_norm(a-b) <= r`.
+ *
+ * \throws std::invalid_argument if r is negative.
  */
 template<typename I>
-    std::unordered_set<Hex<I>> range(const Hex<I>& center, I r)
+    std::unordered_set<Hex<I>> hex_range(const Hex<I>& center, I r)
     {
+        if (r < 0) {
+            throw std::invalid_argument{"r must be non-negative"};
+        }
         std::unordered_set<Hex<I>> tiles;
-        for (int i = -r; i <= r; i++) {
-            for (int j = std::max(-r, -r-i); j <= std::min(r, r-i); j++) {
-                tiles.add(center + Hex<I>(i, j));
+        for (I i = -r; i <= r; i++) {
+            for (I j = std::max(-r, -r-i); j <= std::min(r, I(r-i)); j++) {
+                tiles.insert(center + Hex<I>(i, j));
             }
         }
         return tiles;
