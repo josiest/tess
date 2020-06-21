@@ -5,8 +5,9 @@
 #include <type_traits>  // is_arithmetic
 #include <stdexcept>    // invalid_argument
 #include <cmath>        // abs, sqrt, sqrtf
-#include <algorithm>    // max_element, transform
-#include <numeric>      // numeric
+#include <algorithm>    // max_element
+#include <unordered_set>
+#include <numeric>
 #include <valarray>
 
 namespace hax {
@@ -131,6 +132,42 @@ template<typename I, typename R>
         rv[i] -= std::accumulate(std::begin(rv), std::end(rv), 0);
 
         return Hex<I>(static_cast<I>(rv[0]), static_cast<I>(rv[1]));
+    }
+
+/**
+ * Calculate the hex coordinates in a "straight" line from `a` to `b`.
+ */
+template<typename I>
+    std::vector<Hex<I>> line(const Hex<I>& a, const Hex<I>& b)
+    {
+        auto lerp = [](double a, double b, double t) {
+            return a + (b - a) * t;
+        };
+        auto hex_lerp = [&lerp](const Hex<I>& a, const Hex<I>& b, double t) {
+            return Hex<double>(lerp(a.q(), b.q(), t), lerp(a.r(), b.r(), t));
+        };
+
+        std::vector<Hex<I>> tiles{a};
+        I n = hex_norm(a-b);
+        for (int i = 1; i <= n; i++) {
+            tiles.push_back(hex_round<I>(hex_lerp(a, b, i/(double)n)));
+        }
+        return tiles;
+    }
+
+/**
+ * Calculate the set of hex coordinates within radius `r` of `center`.
+ */
+template<typename I>
+    std::unordered_set<Hex<I>> range(const Hex<I>& center, I r)
+    {
+        std::unordered_set<Hex<I>> tiles;
+        for (int i = -r; i <= r; i++) {
+            for (int j = std::max(-r, -r-i); j <= std::min(r, r-i); j++) {
+                tiles.add(center + Hex<I>(i, j));
+            }
+        }
+        return tiles;
     }
 
 template<typename T>

@@ -129,13 +129,9 @@ TEST(PointTest, BothComponentsPositiveAndLargeWithSmallDifferenceInt) {
 
 TEST(PointTest, BothComponentsPositiveAndLargeWithSmallDifferenceReal) {
     double eps = 0.0001;
-    random_device seed;
 
-    uniform_real_distribution<float> dist(20.01, 99.99);
-    uniform_real_distribution<float> diff_dist(-9.99, 9.99);
-
-    float const y1 = dist(seed);
-    float const x1 = y1 + diff_dist(seed);
+    float const y1 = 87.2481;
+    float const x1 = y1 - 1.51828;
     double const norm1 = sqrt(x1*x1 + y1*y1);
     Point<float> const p1(x1, y1);
 
@@ -144,8 +140,8 @@ TEST(PointTest, BothComponentsPositiveAndLargeWithSmallDifferenceReal) {
     EXPECT_GE(normf(p1), 0.0f);
     EXPECT_LT(abs(normf(p1)-norm1), eps);
 
-    float const x2 = x1 + diff_dist(seed);
-    float const y2 = y2 + diff_dist(seed);
+    float const x2 = x1 + 8.17967;
+    float const y2 = y2 + 2.19761;
     Point<float> const p2(x2, y2);
 
     double const norm12a = sqrt((x1+x2)*(x1+x2) + (y1+y2)*(y1+y2));
