@@ -72,6 +72,9 @@ if os.environ.get('READTHEDOCS', None):
     print('Hello, rtd!')
     config_doxyfile('..', 'build')
     subprocess.call('doxygen', True)
-    os.listdir('build/xml')
+    path_exists = os.path.isdir('build/xml')
+    print(f'does build/xml exist? {path_exists}')
+    print('contents of build/xml')
+    print('\n'.join(os.listdir('build/xml')))
     breathe_projects['hax'] = 'build/xml'
     breathe_default_project = 'hax'
