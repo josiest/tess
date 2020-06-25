@@ -20,8 +20,14 @@ def config_doxyfile(input_dir, output_dir):
     with open('Doxyfile.in', 'r') as f:
         data = f.read()
 
-    data = data.replace('@DOXYGEN_INPUT_DIR@', input_dir)
-    data = data.replace('@DOXYGEN_OUTPUT_DIR@', output_dir)
+    vartable = {'CMAKE_PROJECT_NAME': hax,
+                'DOXYGEN_INPUT_DIR': input_dir,
+                'DOXYGEN_OUTPUT_DIR': output_dir,
+                'HEADER_EXT': 'hpp',
+                'SRC_EXT': 'cpp'}
+
+    for key, value in vartable.items():
+        data = data.replace(f'@{key}@', value)
 
     with open('Doxyfile', 'w') as f:
         f.write(data)
