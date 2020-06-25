@@ -41,7 +41,11 @@ add_custom_target(Doxygen ALL DEPENDS ${DOXYGEN_INDEX_FILE})
 set(SPHINX_SOURCE ${CMAKE_CURRENT_SOURCE_DIR})
 set(SPHINX_BUILD ${CMAKE_CURRENT_BINARY_DIR}/sphinx)
 set(SPHINX_INDEX_FILE ${SPHINX_BUILD}/index.html)
+set(EXAMPLE_DIR ${PROJECT_SOURCE_DIR}/examples)
 file(GLOB DOC_FILES ${SPHINX_SOURCE}/*.rst)
+file(GLOB TEMPLATES ${SPHINX_SOURCE}/_templates/*.html)
+file(GLOB EXAMPLE_SOURCES ${EXAMPLE_DIR}/src/*.cpp)
+file(GLOB EXAMPLE_IMAGES ${EXAMPLE_DIR}/resources/*.png)
 file(MAKE_DIRECTORY ${SPHINX_BUILD})
 
 # define command to compile sphinx docs
@@ -49,7 +53,11 @@ add_custom_command(OUTPUT ${SPHINX_INDEX_FILE}
     COMMAND ${SPHINX_EXECUTABLE} -b html
             -Dbreathe_projects.hax=${DOXYGEN_OUTPUT_DIR}/xml
             ${SPHINX_SOURCE} ${SPHINX_BUILD}
-    DEPENDS ${DOC_FILES} ${DOXYGEN_INDEX_FILE}      # depends on .rst files and xml
+
+    DEPENDS ${DOC_FILES} ${DOXYGEN_INDEX_FILE}      # depends on .rst, xml,
+            ${TEMPLATES} ${EXAMPLE_SOURCES}         #  templates and examples
+            ${EXAMPLE_IMAGES}
+
     MAIN_DEPENDENCY ${SPHINX_SOURCE}/conf.py        # depends on sphinx config
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}   # compile in build/docs
     COMMENT "Compiling Sphinx files"

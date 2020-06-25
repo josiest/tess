@@ -35,7 +35,7 @@ namespace hax {
  * std::is_arithmetic<T>::value
  * \endcode
  */
-template<typename T>
+template<typename T = int>
     class Point {
         T const _x;
         T const _y;

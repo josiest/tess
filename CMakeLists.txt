@@ -24,5 +24,5 @@ add_library(hax INTERFACE)
 target_include_directories(hax INTERFACE ${HAX_HEADER_DIR})
 #set(HAX_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/lib)
 
-# include testing
+# include testing and examples
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)

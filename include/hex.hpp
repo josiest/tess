@@ -9,6 +9,7 @@
 #include <unordered_set>
 #include <numeric>
 #include <valarray>
+#include <vector>
 
 namespace hax {
 
@@ -39,7 +40,7 @@ namespace hax {
  * std::is_arithmetic<T>::value
  * \endcode
  */
-template<typename T>
+template<typename T = int>
     class Hex {
         T _q, _r;
     
