@@ -16,6 +16,7 @@ import subprocess, os
 
 # This code was adapted from https://devblogs.microsoft.com/cppblog/clear-functional-c-documentation-with-sphinx-breathe-doxygen-cmake/
 def config_doxyfile(input_dir, output_dir):
+    data = ''
     with open('Doxyfile.in', 'r') as f:
         data = f.read()
 
@@ -27,11 +28,21 @@ def config_doxyfile(input_dir, output_dir):
 
 breathe_projects = {}
 if os.environ.get('READTHEDOCS', None):
+    print()
     print('Hello, rtd!')
+    print()
 
     input_dir = '../include'
     input_exists = os.path.isdir(input_dir)
     print(f'does input directory exist? {input_exists}')
+
+    print()
+    print('Doxyfile')
+    data = ''
+    with open('Doxyfile') as f:
+        data = f.read()
+    print(data)
+    print()
 
     print(f'contents of {input_dir}')
     print('\n'.join(os.listdir(input_dir)))
