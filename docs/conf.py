@@ -30,12 +30,11 @@ if os.environ.get('READTHEDOCS', None):
     print('Hello, rtd!')
     config_doxyfile('..', 'build')
     subprocess.call('doxygen', None)
-    path_exists = os.path.isdir('build/xml')
+    path_exists = os.path.isdir('../build/docs/doxygen/xml')
     print(f'does build/xml exist? {path_exists}')
     print('contents of build/xml')
     print('\n'.join(os.listdir('build/xml')))
     breathe_projects['hax'] = 'build/xml'
-    breathe_default_project = 'hax'
 
 # -- Project information -----------------------------------------------------
 
@@ -77,4 +76,4 @@ html_favicon = ''
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = []
-
+breathe_default_project = 'hax'
