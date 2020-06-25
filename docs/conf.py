@@ -71,7 +71,7 @@ breathe_projects = {}
 if os.environ.get('READTHEDOCS', None):
     print('Hello, rtd!')
     config_doxyfile('..', 'build')
-    subprocess.call('doxygen', True)
+    subprocess.call('doxygen', None)
     path_exists = os.path.isdir('build/xml')
     print(f'does build/xml exist? {path_exists}')
     print('contents of build/xml')
