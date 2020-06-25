@@ -69,6 +69,7 @@ def config_doxyfile(input_dir, output_dir):
 
 breathe_projects = {}
 if os.environ.get('READTHEDOCS', None):
-    config_doxyfile('..', '../build')
+    config_doxyfile('..', 'build')
     subprocess.call('doxygen', True)
-    breathe_projects['hax'] = '../build/xml'
+    breathe_projects['hax'] = 'build/xml'
+    breathe_default_project = 'hax'
