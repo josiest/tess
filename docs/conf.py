@@ -33,8 +33,8 @@ if os.environ.get('READTHEDOCS', None):
     input_exists = os.path.isdir(input_dir)
     print(f'does input directory exist? {input_exists}')
 
-    print(f'contents of {input_directory}')
-    print('\n'.join(os.listdir(input_directory)))
+    print(f'contents of {input_dir}')
+    print('\n'.join(os.listdir(input_dir)))
     print()
 
     output_dir = 'doxygen'
