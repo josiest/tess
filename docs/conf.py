@@ -58,18 +58,21 @@ html_static_path = []
 
 # This code was adapted from https://devblogs.microsoft.com/cppblog/clear-functional-c-documentation-with-sphinx-breathe-doxygen-cmake/
 def config_doxyfile(input_dir, output_dir):
-    with open('Doxyfile.in', 'r') as file :
-        filedata = file.read()
+    with open('Doxyfile.in', 'r') as f:
+        data = f.read()
 
-    filedata = filedata.replace('@DOXYGEN_INPUT_DIR@', input_dir)
-    filedata = filedata.replace('@DOXYGEN_OUTPUT_DIR@', output_dir)
+    data = data.replace('@DOXYGEN_INPUT_DIR@', input_dir)
+    data = data.replace('@DOXYGEN_OUTPUT_DIR@', output_dir)
 
-    with open('Doxyfile', 'w') as file:
-        file.write(filedata)
+    with open('Doxyfile', 'w') as f:
+        f.write(data)
 
 breathe_projects = {}
 if os.environ.get('READTHEDOCS', None):
+    print('Hello, rtd!')
     config_doxyfile('..', 'build')
     subprocess.call('doxygen', True)
+    print('does the output directory exist?')
+    print(os.path.isdir('build/xml'))
     breathe_projects['hax'] = 'build/xml'
     breathe_default_project = 'hax'
