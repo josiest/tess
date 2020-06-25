@@ -10,7 +10,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
+ import subprocess, os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
@@ -55,3 +55,20 @@ html_favicon = ''
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = []
+
+# This code was adapted from https://devblogs.microsoft.com/cppblog/clear-functional-c-documentation-with-sphinx-breathe-doxygen-cmake/
+def config_doxyfile(input_dir, output_dir):
+    with open('Doxyfile.in', 'r') as file :
+        filedata = file.read()
+
+    filedata = filedata.replace('@DOXYGEN_INPUT_DIR@', input_dir)
+    filedata = filedata.replace('@DOXYGEN_OUTPUT_DIR@', output_dir)
+
+    with open('Doxyfile', 'w') as file:
+        file.write(filedata)
+
+breathe_projects = {}
+if os.environ.get('READTHEDOCS', None):
+    config_doxyfile('..', '../build')
+    subprocess.call('doxygen', True)
+    breathe_projects['hax-documentation'] = '../build/xml'
