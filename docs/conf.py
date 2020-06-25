@@ -71,4 +71,4 @@ breathe_projects = {}
 if os.environ.get('READTHEDOCS', None):
     config_doxyfile('..', '../build')
     subprocess.call('doxygen', True)
-    breathe_projects['hax-documentation'] = '../build/xml'
+    breathe_projects['hax'] = '../build/xml'
