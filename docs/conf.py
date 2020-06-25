@@ -14,6 +14,28 @@ import subprocess, os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+# This code was adapted from https://devblogs.microsoft.com/cppblog/clear-functional-c-documentation-with-sphinx-breathe-doxygen-cmake/
+def config_doxyfile(input_dir, output_dir):
+    with open('Doxyfile.in', 'r') as f:
+        data = f.read()
+
+    data = data.replace('@DOXYGEN_INPUT_DIR@', input_dir)
+    data = data.replace('@DOXYGEN_OUTPUT_DIR@', output_dir)
+
+    with open('Doxyfile', 'w') as f:
+        f.write(data)
+
+breathe_projects = {}
+if os.environ.get('READTHEDOCS', None):
+    print('Hello, rtd!')
+    config_doxyfile('..', 'build')
+    subprocess.call('doxygen', None)
+    path_exists = os.path.isdir('build/xml')
+    print(f'does build/xml exist? {path_exists}')
+    print('contents of build/xml')
+    print('\n'.join(os.listdir('build/xml')))
+    breathe_projects['hax'] = 'build/xml'
+    breathe_default_project = 'hax'
 
 # -- Project information -----------------------------------------------------
 
@@ -56,25 +78,3 @@ html_favicon = ''
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = []
 
-# This code was adapted from https://devblogs.microsoft.com/cppblog/clear-functional-c-documentation-with-sphinx-breathe-doxygen-cmake/
-def config_doxyfile(input_dir, output_dir):
-    with open('Doxyfile.in', 'r') as f:
-        data = f.read()
-
-    data = data.replace('@DOXYGEN_INPUT_DIR@', input_dir)
-    data = data.replace('@DOXYGEN_OUTPUT_DIR@', output_dir)
-
-    with open('Doxyfile', 'w') as f:
-        f.write(data)
-
-breathe_projects = {}
-if os.environ.get('READTHEDOCS', None):
-    print('Hello, rtd!')
-    config_doxyfile('..', 'build')
-    subprocess.call('doxygen', None)
-    path_exists = os.path.isdir('build/xml')
-    print(f'does build/xml exist? {path_exists}')
-    print('contents of build/xml')
-    print('\n'.join(os.listdir('build/xml')))
-    breathe_projects['hax'] = 'build/xml'
-    breathe_default_project = 'hax'
