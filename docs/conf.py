@@ -20,7 +20,7 @@ def config_doxyfile(input_dir, output_dir):
     with open('Doxyfile.in', 'r') as f:
         data = f.read()
 
-    vartable = {'CMAKE_PROJECT_NAME': hax,
+    vartable = {'CMAKE_PROJECT_NAME': 'hax',
                 'DOXYGEN_INPUT_DIR': input_dir,
                 'DOXYGEN_OUTPUT_DIR': output_dir,
                 'HEADER_EXT': 'hpp',
