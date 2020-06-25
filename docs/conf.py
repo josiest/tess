@@ -33,7 +33,7 @@ if os.environ.get('READTHEDOCS', None):
     input_exists = os.path.isdir(input_dir)
     print(f'does input directory exist? {input_exists}')
 
-    output_dir = '../build/docs/doxygen/xml'
+    output_dir = 'doxygen/xml'
     config_doxyfile(input_dir, output_dir)
     subprocess.call('doxygen', None)
 
