@@ -15,4 +15,4 @@ include directory.
 
 ## Documentation
 
-Can be found [here]().
+Can be found [here](https://hax-documentation.readthedocs.io/en/latest/).
