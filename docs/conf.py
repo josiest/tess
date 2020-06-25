@@ -33,17 +33,17 @@ if os.environ.get('READTHEDOCS', None):
     input_exists = os.path.isdir(input_dir)
     print(f'does input directory exist? {input_exists}')
 
-    output_dir = 'doxygen/xml'
+    output_dir = 'doxygen'
     config_doxyfile(input_dir, output_dir)
     subprocess.call('doxygen', None)
 
-    output_exists = os.path.isdir(output_dir)
+    output_exists = os.path.isdir(f'{output_dir}/xml')
     print(f'does output directory exist? {output_exists}')
 
     print(f'contents of {output_dir}')
-    print('\n'.join(os.listdir(output_dir)))
+    print('\n'.join(os.listdir(f'{output_dir}/xml')))
 
-    breathe_projects['hax'] = output_dir
+    breathe_projects['hax'] = f'{output_dir}/xml'
 
 # -- Project information -----------------------------------------------------
 
