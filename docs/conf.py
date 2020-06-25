@@ -14,8 +14,12 @@ import subprocess, os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
-# This code was adapted from https://devblogs.microsoft.com/cppblog/clear-functional-c-documentation-with-sphinx-breathe-doxygen-cmake/
-def config_doxyfile(input_dir, output_dir):
+# This code was adapted from
+# https://devblogs.microsoft.com/cppblog/clear-functional-c-documentation-with-
+#   sphinx-breathe-doxygen-cmake/
+
+# replace variables in Doxyfile.in with respective values
+def make_doxyfile(input_dir, output_dir):
     data = ''
     with open('Doxyfile.in', 'r') as f:
         data = f.read()
@@ -32,41 +36,12 @@ def config_doxyfile(input_dir, output_dir):
     with open('Doxyfile', 'w') as f:
         f.write(data)
 
+# setup readthedocs to compile doxygen
 breathe_projects = {}
 if os.environ.get('READTHEDOCS', None):
-    print()
-    print('Hello, rtd!')
-    print()
-
-    input_dir = '../include'
-    input_exists = os.path.isdir(input_dir)
-    print(f'does input directory exist? {input_exists}')
-
-    print(f'contents of {input_dir}')
-    print('\n'.join(os.listdir(input_dir)))
-    print()
-
-    output_dir = 'doxygen'
-    config_doxyfile(input_dir, output_dir)
-
-    print()
-    print('Doxyfile')
-    data = ''
-    with open('Doxyfile') as f:
-        data = f.read()
-    print(data)
-    print()
-
+    make_doxyfile('../include', 'doxygen')
     subprocess.call('doxygen', None)
-
-    output_exists = os.path.isdir(f'{output_dir}/xml')
-    print(f'does output directory exist? {output_exists}')
-
-    print(f'contents of {output_dir}/xml')
-    print('\n'.join(os.listdir(f'{output_dir}/xml')))
-    print()
-
-    breathe_projects['hax'] = f'{output_dir}/xml'
+    breathe_projects['hax'] = 'doxygen/xml'
 
 # -- Project information -----------------------------------------------------
 
