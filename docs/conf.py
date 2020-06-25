@@ -28,14 +28,21 @@ def config_doxyfile(input_dir, output_dir):
 breathe_projects = {}
 if os.environ.get('READTHEDOCS', None):
     print('Hello, rtd!')
+
     input_dir = '../include'
+    input_exists = os.path.isdir(input_dir)
+    print(f'does input directory exist? {input_exists}')
+
     output_dir = '../build/docs/doxygen/xml'
     config_doxyfile(input_dir, output_dir)
     subprocess.call('doxygen', None)
-    path_exists = os.path.isdir(output_dir)
-    print(f'does build/xml exist? {path_exists}')
+
+    output_exists = os.path.isdir(output_dir)
+    print(f'does output directory exist? {output_exists}')
+
     print(f'contents of {output_dir}')
     print('\n'.join(os.listdir(output_dir)))
+
     breathe_projects['hax'] = output_dir
 
 # -- Project information -----------------------------------------------------
