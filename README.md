@@ -1,6 +1,6 @@
 # tess
 
-![tess example](examples/resources/hax.gif)
+![tess example](examples/resources/tess.gif)
 
 `tess` is a library for tessalating hexagons into grids. It provides basic
 functionality such as converting hex coordinates to pixel coordinates and vice
