@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
-#include "hax.hpp"
+#include "tess.hpp"
 #include <random>
 
-using namespace hax;
+using namespace tess;
 using namespace std;
 
 TEST(LineTest, LengthZeroStartZero) {

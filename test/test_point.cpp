@@ -1,10 +1,10 @@
 #include "gtest/gtest.h"
-#include "hax.hpp"
+#include "tess.hpp"
 #include <limits>
 #include <random>
 #include <cstdlib>
 
-using namespace hax;
+using namespace tess;
 using namespace std;
 
 TEST(PointTest, BothComponentsZeroInt) {

@@ -1,12 +1,12 @@
 #include "gtest/gtest.h"
-#include "hax.hpp"
+#include "tess.hpp"
 #include <limits>           // infinity, min, max
 #include <random>           /* random_device, uniform_int_distribution
                              * unifom_real_distribution */
 #include <cstdlib>          // 
 #include <iostream>
 
-using namespace hax;
+using namespace tess;
 using namespace std;
 
 TEST(HexTest, AllIntComponentsZero) {

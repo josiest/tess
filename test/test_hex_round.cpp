@@ -1,9 +1,9 @@
 #include "gtest/gtest.h"
-#include "hax.hpp"
+#include "tess.hpp"
 #include <limits>
 #include <random>
 
-using namespace hax;
+using namespace tess;
 using namespace std;
 
 TEST(HexRoundTest, AllComponentsZero) {
