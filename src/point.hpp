@@ -1,12 +1,11 @@
-#ifndef HAX_POINT_H
-#define HAX_POINT_H
+#pragma once
 
 #include <ostream>
 #include <type_traits>
 #include <stdexcept>
 #include <cmath>
 
-namespace hax {
+namespace tess {
 
 /**
  * A represenatation of a cartesian point.
@@ -151,8 +150,8 @@ template<typename T>
 namespace std {
 
 template <typename T>
-    struct hash<hax::Point<T>> {
-        size_t operator()(const hax::Point<T>& p) const {
+    struct hash<tess::Point<T>> {
+        size_t operator()(const tess::Point<T>& p) const {
             hash<double> dhash;
             size_t px = dhash((double)p.x());
             size_t py = dhash((double)p.y());

@@ -1,8 +1,5 @@
-#ifndef HAX_HPP
-#define HAX_HPP
+#pragma once
 
 #include "point.hpp"
 #include "hex.hpp"
 #include "basis.hpp"
-
-#endif

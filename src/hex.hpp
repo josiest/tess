@@ -1,5 +1,4 @@
-#ifndef HAX_HEX_HPP
-#define HAX_HEX_HPP
+#pragma once
 
 #include <ostream>
 #include <type_traits>  // is_arithmetic
@@ -11,7 +10,7 @@
 #include <valarray>
 #include <vector>
 
-namespace hax {
+namespace tess {
 
 /**
  * A representation of a hexagonal coordinate.
@@ -114,7 +113,7 @@ template<typename T>
  * integers.
  */
 template<typename I, typename R>
-    Hex<I> hex_round(const hax::Hex<R>& h)
+    Hex<I> hex_round(const tess::Hex<R>& h)
     {
         // convert hex to valarray for easy operations
         std::valarray<R> v{h.q(), h.r(), h.s()};
@@ -217,8 +216,8 @@ template<typename T>
 namespace std {
 
 template <typename T>
-    struct hash<hax::Hex<T>> {
-        size_t operator()(const hax::Hex<T>& h) const {
+    struct hash<tess::Hex<T>> {
+        size_t operator()(const tess::Hex<T>& h) const {
             hash<double> dhash;
             size_t hq = dhash((double)h.q());
             size_t hr = dhash((double)h.r());

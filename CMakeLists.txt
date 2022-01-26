@@ -1,31 +1,27 @@
-# code adapted from
-#   https://devblogs.microsoft.com/cppblog/clear-functional-c-documentation-
-#   with-sphinx-breathe-doxygen-cmake/
-# and from
-#   https://vicrucann.github.io/tutorials/quick-cmake-doxygen/
-
 # set cmake and compiler options
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.10)
+project(tess)
+
+# variables for install destinations
+include(GNUInstallDirs)
+
+# specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
-project(hax)
+set(CMAKE_CXX_STANDARD REQUIRED true)
 
-# include custom modules
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+# specify the file interface
+set(tess_SRCEXT cpp)
+set(tess_INCEXT hpp)
+set(tess_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/src)
 
-# global project structure
-set(HAX_HEADER_DIR ${PROJECT_SOURCE_DIR}/include)
+# Add the source code
+add_subdirectory(src)
 
 # Add an option to compile the documentation
 option(DOCS "Compile documentation" OFF)
 if (DOCS)
     add_subdirectory(${PROJECT_SOURCE_DIR}/docs)
 endif()
-
-# setup the library
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "lib")
-add_library(hax INTERFACE)
-target_include_directories(hax INTERFACE ${HAX_HEADER_DIR})
-#set(HAX_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/lib)
 
 # Add an option to compile tests
 option(TESTING "Compile tests" OFF)

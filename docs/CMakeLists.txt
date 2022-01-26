@@ -4,6 +4,9 @@
 # and from
 #   https://vicrucann.github.io/tutorials/quick-cmake-doxygen/
 
+# include custom modules
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+
 find_package(Doxygen REQUIRED)
 find_package(Sphinx REQUIRED)
 
