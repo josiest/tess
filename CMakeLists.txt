@@ -25,6 +25,6 @@ endif()
 
 # Add an option to compile tests
 option(TESTING "Compile tests" OFF)
-if (DOCS)
+if (TESTING)
     add_subdirectory(${PROJECT_SOURCE_DIR}/test)
 endif()
