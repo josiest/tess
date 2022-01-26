@@ -54,7 +54,7 @@ file(MAKE_DIRECTORY ${SPHINX_BUILD})
 # define command to compile sphinx docs
 add_custom_command(OUTPUT ${SPHINX_INDEX_FILE}
     COMMAND ${SPHINX_EXECUTABLE} -b html
-            -Dbreathe_projects.hax=${DOXYGEN_OUTPUT_DIR}/xml
+            -Dbreathe_projects.tess=${DOXYGEN_OUTPUT_DIR}/xml
             ${SPHINX_SOURCE} ${SPHINX_BUILD}
 
     DEPENDS ${DOC_FILES} ${DOXYGEN_INDEX_FILE}      # depends on .rst, xml,

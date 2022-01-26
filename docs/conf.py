@@ -24,7 +24,7 @@ def make_doxyfile(input_dir, output_dir):
     with open('Doxyfile.in', 'r') as f:
         data = f.read()
 
-    vartable = {'CMAKE_PROJECT_NAME': 'hax',
+    vartable = {'CMAKE_PROJECT_NAME': 'tess',
                 'DOXYGEN_INPUT_DIR': input_dir,
                 'DOXYGEN_OUTPUT_DIR': output_dir,
                 'HEADER_EXT': 'hpp',
@@ -41,11 +41,11 @@ breathe_projects = {}
 if os.environ.get('READTHEDOCS', None):
     make_doxyfile('../include', 'doxygen')
     subprocess.call('doxygen', None)
-    breathe_projects['hax'] = 'doxygen/xml'
+    breathe_projects['tess'] = 'doxygen/xml'
 
 # -- Project information -----------------------------------------------------
 
-project = 'hax'
+project = 'tess'
 copyright = '2020, Josie Thompson'
 author = 'Josie Thompson'
 
@@ -56,7 +56,7 @@ author = 'Josie Thompson'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['breathe']
-breathe_default_project = 'hax'
+breathe_default_project = 'tess'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = []
@@ -83,4 +83,4 @@ html_favicon = ''
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = []
-breathe_default_project = 'hax'
+breathe_default_project = 'tess'
