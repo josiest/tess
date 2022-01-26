@@ -12,9 +12,9 @@ find_package(Sphinx REQUIRED)
 
 # define project structure variables
 set(HEADER_EXT "hpp")
-file(GLOB tess_HEADERS ${tess_HEADER_DIR}/*.${HEADER_EXT})
+file(GLOB tess_HEADERS ${tess_INCLUDE_DIR}/*.${HEADER_EXT})
 
-set(DOXYGEN_INPUT_DIR ${tess_HEADER_DIR})
+set(DOXYGEN_INPUT_DIR ${tess_INCLUDE_DIR})
 set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/doxygen)
 
 # explicitly make the directory so it won't shout warnings at us
