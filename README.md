@@ -23,4 +23,4 @@ $ sudo cmake --install .
 
 ## Documentation
 
-Can be found [here](https://hax-documentation.readthedocs.io/en/latest/).
+Under construction ...
