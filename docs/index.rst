@@ -90,7 +90,7 @@ math functions
 
 |
 
-.. doxygenfunction:: tess::hex_round(const Hex<R> &h) noexcept
+.. doxygenfunction:: tess::hex_round(const tess::Hex<R> &h)
 
 |
 
