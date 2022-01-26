@@ -12,9 +12,9 @@ find_package(Sphinx REQUIRED)
 
 # define project structure variables
 set(HEADER_EXT "hpp")
-file(GLOB HAX_HEADERS ${HAX_HEADER_DIR}/*.${HEADER_EXT})
+file(GLOB tess_HEADERS ${tess_HEADER_DIR}/*.${HEADER_EXT})
 
-set(DOXYGEN_INPUT_DIR ${HAX_HEADER_DIR})
+set(DOXYGEN_INPUT_DIR ${tess_HEADER_DIR})
 set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/doxygen)
 
 # explicitly make the directory so it won't shout warnings at us
@@ -30,7 +30,7 @@ configure_file(${DOXYFILE_IN} ${DOXYFILE_OUT} @ONLY)
 # command for compiling doxygen files
 add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
     COMMAND Doxygen::doxygen ${DOXYFILE_OUT}        # run doxygen with Doxyfile
-    DEPENDS ${HAX_HEADERS}                          # depends on headers
+    DEPENDS ${tess_HEADERS}                          # depends on headers
     MAIN_DEPENDENCY ${DOXYFILE_OUT} ${DOXYFILE_IN}  # depends on Doxyfile.in
     COMMENT "Compiling Doxygen files"
     VERBATIM)

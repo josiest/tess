@@ -1,4 +1,4 @@
-#include "hax.hpp"
+#include "tess/tess.hpp"
 #include <SFML/Graphics.hpp>
 #include <unordered_map>
 #include <optional>
@@ -6,7 +6,7 @@
 #include <vector>
 
 // convert a hex coordinate to sfml shape
-sf::ConvexShape hex_shape(const hax::Basis<float>& basis, const hax::Hex<>& hex)
+sf::ConvexShape hex_shape(const tess::Basis<float>& basis, const tess::Hex<>& hex)
 {
     sf::ConvexShape shape{6};
 
@@ -29,25 +29,25 @@ int main(int argc, char * argv[])
     int const unit_size = 30;
 
     // Create the window, but make sure it's not resizeable
-    sf::RenderWindow window{sf::VideoMode(width, height), "hax example",
+    sf::RenderWindow window{sf::VideoMode(width, height), "tess example",
                             sf::Style::Titlebar | sf::Style::Close};
 
     // Create the basis for the grid - centered in the middle of the screen
-    hax::Basis<float> basis{hax::Point<>(width/2, height/2), unit_size};
+    tess::Basis<float> basis{tess::Point<>(width/2, height/2), unit_size};
 
     // hovered will keep track of which hex the mouse is currently over
-    std::optional<hax::Hex<>> hovered = std::nullopt;
+    std::optional<tess::Hex<>> hovered = std::nullopt;
 
     // clicked will keep track of which hex was clicked if mouse button is down
-    std::optional<hax::Hex<>> clicked = std::nullopt;
+    std::optional<tess::Hex<>> clicked = std::nullopt;
 
     // clicked_range will keep track of all the hexes from clicked to hovered
-    std::unordered_set<hax::Hex<>> clicked_range;
+    std::unordered_set<tess::Hex<>> clicked_range;
 
     // initialize the set of hexes we're working with
     // and set some basic graphical settings
-    std::unordered_map<hax::Hex<>, sf::ConvexShape> shapes;
-    for (const auto& hex : hax::hex_range(hax::Hex<>::zero, 30)) {
+    std::unordered_map<tess::Hex<>, sf::ConvexShape> shapes;
+    for (const auto& hex : tess::hex_range(tess::Hex<>::zero, 30)) {
         auto shape = hex_shape(basis, hex);
         shape.setOutlineColor(sf::Color::Black);
         shape.setOutlineThickness(1.0f);
@@ -65,18 +65,18 @@ int main(int argc, char * argv[])
                 break;
 
             case sf::Event::MouseMoved: {
-                // convert the sfml point to a hax point
+                // convert the sfml point to a tess point
                 // and round it to the nearest hex
-                hax::Point<> hovered_pixel{event.mouseMove.x,
+                tess::Point<> hovered_pixel{event.mouseMove.x,
                                            event.mouseMove.y};
-                hovered = hax::hex_round<int>(basis.hex(hovered_pixel));
+                hovered = tess::hex_round<int>(basis.hex(hovered_pixel));
 
                 // if the mouse button is down, update the line from the
                 // clicked hex to the hovered hex
                 if (clicked) {
-                    auto tiles = hax::line(*clicked, *hovered);
+                    auto tiles = tess::line(*clicked, *hovered);
                     clicked_range =
-                        std::unordered_set<hax::Hex<>>(tiles.begin(),
+                        std::unordered_set<tess::Hex<>>(tiles.begin(),
                                                        tiles.end());
                 }
             }
@@ -86,9 +86,9 @@ int main(int argc, char * argv[])
                 // keep track of the clicked coordinate
                 // when the mouse button gets pressed
                 if (event.mouseButton.button == sf::Mouse::Button::Left) {
-                    hax::Point<> clicked_pixel{event.mouseButton.x,
+                    tess::Point<> clicked_pixel{event.mouseButton.x,
                                                event.mouseButton.y};
-                    clicked = hax::hex_round<int>(basis.hex(clicked_pixel));
+                    clicked = tess::hex_round<int>(basis.hex(clicked_pixel));
                 }
             }
             break;

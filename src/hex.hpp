@@ -226,5 +226,3 @@ template <typename T>
     };
 
 }
-
-#endif

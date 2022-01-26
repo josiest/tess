@@ -1,9 +1,9 @@
-#include "hax.hpp"
+#include "tess/tess.hpp"
 #include <SFML/Graphics.hpp>
 #include <vector>
 
 // convert a hex coordinate to an sfml shape
-sf::ConvexShape hex_shape(const hax::Basis<float>& basis, const hax::Hex<>& hex)
+sf::ConvexShape hex_shape(const tess::Basis<float>& basis, const tess::Hex<>& hex)
 {
     sf::ConvexShape shape{6};
 
@@ -25,16 +25,16 @@ int main(int argc, char * argv[])
     int const unit_size = 50;
 
     // Create the window, but make sure it's not resizeable
-    sf::RenderWindow window{sf::VideoMode(width, height), "hax simple example",
+    sf::RenderWindow window{sf::VideoMode(width, height), "tess simple example",
                             sf::Style::Titlebar | sf::Style::Close};
 
     // Create the basis for the grid, centered in the middle of the screen
-    hax::Basis<float> basis{hax::Point<>(width/2, height/2), unit_size};
+    tess::Basis<float> basis{tess::Point<>(width/2, height/2), unit_size};
 
     // initialize the hexes we're working with
     // and set some basic graphical settings
     std::vector<sf::ConvexShape> shapes;
-    for (const auto& hex : hax::hex_range(hax::Hex<>::zero, 3)) {
+    for (const auto& hex : tess::hex_range(tess::Hex<>::zero, 3)) {
         auto shape = hex_shape(basis, hex);
         shape.setOutlineColor(sf::Color::Black);
         shape.setOutlineThickness(1.0f);
