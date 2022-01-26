@@ -1,6 +1,6 @@
 # tess
 
-![tess example](examples/resources/tess.gif)
+![tess example](examples/resources/hax.gif)
 
 `tess` is a library for tessalating hexagons into grids. It provides basic
 functionality such as converting hex coordinates to pixel coordinates and vice
@@ -23,4 +23,4 @@ $ sudo cmake --install .
 
 ## Documentation
 
-Can be found [here](https://tess-documentation.readthedocs.io/en/latest/).
+Can be found [here](https://hax-documentation.readthedocs.io/en/latest/).
