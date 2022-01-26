@@ -15,8 +15,11 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 # global project structure
 set(HAX_HEADER_DIR ${PROJECT_SOURCE_DIR}/include)
 
-# include the documentation
-add_subdirectory(${PROJECT_SOURCE_DIR}/docs)
+# Add an option to compile the documentation
+option(DOCS "Compile documentation" OFF)
+if (DOCS)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/docs)
+endif()
 
 # setup the library
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "lib")
@@ -24,5 +27,8 @@ add_library(hax INTERFACE)
 target_include_directories(hax INTERFACE ${HAX_HEADER_DIR})
 #set(HAX_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/lib)
 
-# include testing and examples
-add_subdirectory(${PROJECT_SOURCE_DIR}/test)
+# Add an option to compile tests
+option(TESTING "Compile tests" OFF)
+if (DOCS)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/test)
+endif()
