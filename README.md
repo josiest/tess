@@ -23,4 +23,4 @@ $ sudo cmake --install .
 
 ## Documentation
 
-Under construction ...
+[Wiki page](https://github.com/josiest/tess/wiki)
