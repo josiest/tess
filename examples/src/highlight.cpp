@@ -1,10 +1,12 @@
 #include "tess/tess.hpp"
 #include <SFML/Graphics.hpp>
+
 #include <unordered_map>
-#include <optional>
-#include <unordered_set>
 #include <vector>
+#include <optional>
+
 #include <ranges>
+#include <algorithm>
 
 namespace views = std::views;
 namespace ranges = std::ranges;
@@ -24,6 +26,114 @@ sf::ConvexShape hex_shape(const tess::Basis<float>& basis,
     return shape;
 }
 
+struct input_manager{
+    static input_manager with_basis(int x, int y, int unit_size);
+
+    constexpr bool is_hovered(const tess::hex& h) const;
+    constexpr bool is_clicked(const tess::hex& h) const;
+
+    void on_mouse_moved(int x, int y);
+    void on_mouse_clicked(sf::Mouse::Button button, int x, int y);
+    void on_mouse_released(sf::Mouse::Button button);
+
+    tess::Basis<float> basis;
+    std::optional<tess::hex> hovered = std::nullopt;
+    std::vector<tess::hex> clicked;
+};
+
+input_manager
+input_manager::with_basis(int x, int y, int unit_size)
+{
+    const tess::point origin{ x, y };
+    input_manager input{ tess::Basis<float>{ origin, unit_size } };
+    input.clicked.reserve(20);
+    return input;
+}
+
+constexpr bool input_manager::is_hovered(const tess::hex& h) const
+{
+    return hovered == h;
+}
+
+constexpr bool input_manager::is_clicked(const tess::hex& h) const
+{
+    return ranges::find(clicked, h) != ranges::end(clicked);
+}
+
+void input_manager::on_mouse_moved(int x, int y)
+{
+    // convert the sfml point to a tess point
+    // and round it to the nearest hex
+    hovered = tess::hex_round<int>(basis.hex(tess::point{ x, y }));
+    
+    // if the mouse button is down, update the line from the
+    // clicked hex to the hovered hex
+    if (clicked.empty()) { return; }
+
+    const auto first = clicked.front();
+    clicked.clear();
+    tess::line(first, *hovered, std::back_inserter(clicked));
+}
+
+void input_manager::on_mouse_clicked(sf::Mouse::Button button, int x, int y)
+{
+    if (button != sf::Mouse::Button::Left) { return; }
+
+    const tess::point clicked_pixel{ x, y };
+    clicked.push_back(tess::hex_round<int>(basis.hex(clicked_pixel)));
+}
+
+void input_manager::on_mouse_released(sf::Mouse::Button button)
+{
+    if (button != sf::Mouse::Button::Left) { return; }
+    clicked.clear();
+}
+
+struct ui_manager{
+    static ui_manager
+    with_board_radius(const tess::Basis<float>& basis, int r);
+
+    void draw_shapes(sf::RenderWindow& window, const input_manager& input);
+
+    std::unordered_map<tess::hex, sf::ConvexShape> shapes;
+};
+
+ui_manager
+ui_manager::with_board_radius(const tess::Basis<float>& basis, int r)
+{
+    ui_manager ui;
+
+    // initialize the set of hexes we're working with
+    // and set some basic graphical settings
+    std::vector<tess::hex> hexes;
+    tess::hex_range(tess::hex::zero, r, std::back_inserter(hexes));
+
+    ui.shapes.reserve(hexes.size());
+    for (const auto& h : hexes) {
+        ui.shapes.emplace(h, hex_shape(basis, h));
+    }
+    return ui;
+}
+
+void ui_manager::draw_shapes(sf::RenderWindow& window,
+                             const input_manager& input)
+{
+    for (auto& shape_pair : shapes) {
+        const auto& h = shape_pair.first;
+        auto& shape = shape_pair.second;
+
+        // color selected tiles cyan
+        if (input.is_hovered(h) || input.is_clicked(h)) {
+            shape.setFillColor(sf::Color::Cyan);
+        }
+        // color non selected tiles white
+        else {
+            shape.setFillColor(sf::Color::White);
+        }
+        window.draw(shape);
+    }
+}
+
 int main(int argc, char * argv[])
 {
     // local variables to use for the screen width and height and the unit
@@ -36,30 +146,10 @@ int main(int argc, char * argv[])
     sf::RenderWindow window{sf::VideoMode(width, height), "tess example",
                             sf::Style::Titlebar | sf::Style::Close};
 
-    // Create the basis for the grid - centered in the middle of the screen
-    tess::Basis<float> basis{ tess::point{ width/2, height/2 },
-                              unit_size };
-
-    // hovered will keep track of which hex the mouse is currently over
-    std::optional<tess::hex> hovered = std::nullopt;
-
-    // clicked will keep track of which hex was clicked if mouse button is down
-    std::optional<tess::hex> clicked = std::nullopt;
-
-    // clicked_range will keep track of all the hexes from clicked to hovered
-    std::unordered_set<tess::hex> clicked_range;
-    clicked_range.reserve(20);
-
-    // initialize the set of hexes we're working with
-    // and set some basic graphical settings
-    std::vector<tess::hex> hexes;
-    tess::hex_range(tess::hex::zero, 30, std::back_inserter(hexes));
-
-    std::unordered_map<tess::hex, sf::ConvexShape> shapes;
-    shapes.reserve(hexes.size());
-    for (const auto& h : hexes) {
-        shapes.emplace(h, hex_shape(basis, h));
-    }
+    // handles input, keeping track of hovered and clicked tiles
+    auto input = input_manager::with_basis(width/2, height/2, unit_size);
+    // handles displaying the tiles
+    auto ui = ui_manager::with_board_radius(input.basis, 30);
 
     while (window.isOpen()) {
         sf::Event event;
@@ -71,68 +161,23 @@ int main(int argc, char * argv[])
                 window.close();
                 break;
 
-            case sf::Event::MouseMoved: {
-                // convert the sfml point to a tess point
-                // and round it to the nearest hex
-                tess::point hovered_pixel{ event.mouseMove.x,
-                                               event.mouseMove.y };
-                hovered = tess::hex_round<int>(basis.hex(hovered_pixel));
+            case sf::Event::MouseMoved:
+                input.on_mouse_moved(event.mouseMove.x, event.mouseMove.y);
+                break;
 
-                // if the mouse button is down, update the line from the
-                // clicked hex to the hovered hex
-                if (clicked) {
-                    std::vector<tess::hex> tiles;
-                    tiles.reserve(tess::hex_norm(*clicked-*hovered));
-                    tess::line(*clicked, *hovered, std::back_inserter(tiles));
-
-                    clicked_range.clear();
-                    auto into_clicked =
-                        std::inserter(clicked_range,
-                                      std::begin(clicked_range));
-                    ranges::copy(tiles, into_clicked);
-
-                    // clicked_range.clear();
-                    // ranges::copy(tess::line_view(*clicked, *hovered),
-                    //              std::inserter(clicked_range));
-                }
-            }
-            break;
-
-            case sf::Event::MouseButtonPressed: {
-                // keep track of the clicked coordinate
-                // when the mouse button gets pressed
-                if (event.mouseButton.button == sf::Mouse::Button::Left) {
-                    const tess::point clicked_pixel{ event.mouseButton.x,
-                                                     event.mouseButton.y };
-                    clicked = tess::hex_round<int>(basis.hex(clicked_pixel));
-                }
-            }
-            break;
+            case sf::Event::MouseButtonPressed:
+                input.on_mouse_clicked(event.mouseButton.button,
+                                       event.mouseButton.x,
+                                       event.mouseButton.y);
+                break;
 
             case sf::Event::MouseButtonReleased:
-                // reset clicked data when the mouse button is released
-                if (event.mouseButton.button == sf::Mouse::Button::Left) {
-                    clicked = std::nullopt;
-                    clicked_range.clear();
-                }
+                input.on_mouse_released(event.mouseButton.button);
                 break;
             }
         }
         window.clear();
-        for (auto& shape_pair : shapes) {
-            const auto& h = shape_pair.first;
-            auto& shape = shape_pair.second;
-
-            // color selected tiles cyan
-            if (h == hovered || clicked_range.contains(h)) {
-                shape.setFillColor(sf::Color::Cyan);
-            }
-            // color non selected tiles white
-            else {
-                shape.setFillColor(sf::Color::White);
-            }
-            window.draw(shape);
-        }
+        ui.draw_shapes(window, input);
         window.display();
     }
 }
