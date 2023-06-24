@@ -1,42 +1,48 @@
 #include "gtest/gtest.h"
 #include "tess.hpp"
+#include "utility.hpp"
+#include <unordered_set>
 
 using namespace tess;
-using namespace std;
+using long_hex = basic_hex<long>;
 
 TEST(HexRangeTest, CenterZeroRadiusZero) {
-    auto const tiles = hex_range(Hex<int>::zero, 0);
+    std::unordered_set<hex> tiles;
+    hex_range(hex::zero, 0, std::inserter(tiles, std::begin(tiles)));
     EXPECT_EQ(tiles.size(), 1);
-    EXPECT_NE(tiles.find(Hex<int>::zero), tiles.end());
-    EXPECT_EQ(tiles.find(Hex<int>::left_up), tiles.end());
+    EXPECT_NE(tiles.find(hex::zero), tiles.end());
+    EXPECT_EQ(tiles.find(hex::left_up), tiles.end());
 }
 
 TEST(HexRangeTest, CenterZeroRadiusPositive) {
     long const radius = 9;
-    auto const tiles = hex_range(Hex<long>::zero, radius);
+    std::unordered_set<long_hex> tiles;
+    hex_range(long_hex::zero, radius, std::inserter(tiles, std::begin(tiles)));
     EXPECT_EQ(tiles.size(), 271);
-    EXPECT_NE(tiles.find(Hex<long>::zero), tiles.end());
-    EXPECT_NE(tiles.find(Hex<long>::right_down), tiles.end());
-    EXPECT_NE(tiles.find(Hex<long>(-5, 9)), tiles.end());
-    EXPECT_EQ(tiles.find(Hex<long>(10, 0)), tiles.end());
+    EXPECT_NE(tiles.find(long_hex::zero), tiles.end());
+    EXPECT_NE(tiles.find(long_hex::right_down), tiles.end());
+    EXPECT_NE(tiles.find(long_hex(-5, 9)), tiles.end());
+    EXPECT_EQ(tiles.find(long_hex(10, 0)), tiles.end());
 }
 
 TEST(HexRangeTest, RadiusZeroCenterPositive) {
-    Hex<long> const center{8, 84};
-    auto const tiles = hex_range(center, 0l);
+    long_hex const center{8, 84};
+    std::unordered_set<long_hex> tiles;
+    hex_range(center, 0l, std::inserter(tiles, std::begin(tiles)));
     EXPECT_EQ(tiles.size(), 1);
     EXPECT_NE(tiles.find(center), tiles.end());
-    EXPECT_EQ(tiles.find(Hex<long>::zero), tiles.end());
+    EXPECT_EQ(tiles.find(long_hex::zero), tiles.end());
 }
 
 TEST(HexRangeTest, CenterNegative) {
-    short const radius = 2;
-    Hex<short> const center{-17, -84};
+    int const radius = 2;
+    hex const center{-17, -84};
 
-    auto const tiles = hex_range(center, radius);
+    std::unordered_set<hex> tiles;
+    hex_range(center, radius, std::inserter(tiles, std::begin(tiles)));
     EXPECT_EQ(tiles.size(), 19);
     EXPECT_NE(tiles.find(center), tiles.end());
-    EXPECT_NE(tiles.find(center + Hex<short>(1, -2)), tiles.end());
-    EXPECT_NE(tiles.find(center + Hex<short>(2, 0)), tiles.end());
-    EXPECT_EQ(tiles.find(center + Hex<short>(-1, 3)), tiles.end());
+    EXPECT_NE(tiles.find(center + hex(1, -2)), tiles.end());
+    EXPECT_NE(tiles.find(center + hex(2, 0)), tiles.end());
+    EXPECT_EQ(tiles.find(center + hex(-1, 3)), tiles.end());
 }

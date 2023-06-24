@@ -1,153 +1,155 @@
 #include "gtest/gtest.h"
 #include "tess.hpp"
-#include <limits>
-#include <random>
+#include "utility.hpp"
+
+#include <cmath>    // min, max
+#include <limits> // numeric_limits
+#include <random> // std::random_device, std::uniform_real_distribution
 
 using namespace tess;
-using namespace std;
+using long_hex = basic_hex<long>;
 
 TEST(HexRoundTest, AllComponentsZero) {
-    Hex<double> const rhex{0.0, 0.0};
-
+    hexd const rhex{0., 0.};
     auto ihex = hex_round<int>(rhex);
-    EXPECT_EQ(ihex, Hex<int>::zero);
+    EXPECT_EQ(ihex, hex::zero);
 }
 
 TEST(HexRoundTest, CenterZeroQCrossR) {
-    random_device seed;
-    uniform_real_distribution<float> qdist(0.0, 0.5);
-    float const q = qdist(seed);
+    std::random_device seed;
+    std::uniform_real_distribution qdist(0.f, 0.5f);
+    auto const q = qdist(seed);
 
-    uniform_real_distribution<float> rdist(0.0, 0.5-q);
-    Hex<float> const rhex{q, rdist(seed)};
+    std::uniform_real_distribution rdist(0.f, 0.5f-q);
+    hexf const rhex{q, rdist(seed)};
 
     auto ihex = hex_round<int>(rhex);
-    EXPECT_EQ(ihex, Hex<int>::zero);
+    EXPECT_EQ(ihex, hex::zero);
 }
 
 TEST(HexRoundTest, CenterPositiveQCrossS) {
-    random_device seed;
+    std::random_device seed;
 
-    uniform_int_distribution<int> cdist(1, 50);
-    int const Q = cdist(seed);
-    int const S = cdist(seed);
+    std::uniform_int_distribution cdist(1, 50);
+    auto const Q = cdist(seed);
+    auto const S = cdist(seed);
 
-    uniform_real_distribution<long double> qdist(0.0, 0.5);
-    long double const q = qdist(seed);
+    std::uniform_real_distribution qdist(0.l, .5l);
+    auto const q = qdist(seed);
 
-    uniform_real_distribution<long double> sdist(0.0, 0.5-q);
-    Hex<long double> rhex{Q+q, -Q-S-q-sdist(seed)};
+    std::uniform_real_distribution sdist(0.l, .5l-q);
+    basic_hex rhex{Q+q, -Q-S-q-sdist(seed)};
 
-    Hex<int> const expected{Q, -Q-S};
+    hex const expected_val{Q, -Q-S};
     auto ihex = hex_round<int>(rhex);
-    EXPECT_EQ(ihex, expected);
+    EXPECT_EQ(ihex, expected_val);
 }
 
 TEST(HexRoundTest, CenterNegativeRCrossS) {
-    random_device seed;
+    std::random_device seed;
 
-    uniform_int_distribution<short> cdist(-50, -1);
-    short const R = cdist(seed);
-    short const S = cdist(seed);
+    std::uniform_int_distribution cdist(-50, -1);
+    auto const R = cdist(seed);
+    auto const S = cdist(seed);
 
-    uniform_real_distribution<double> rdist(0.0, 0.5);
+    std::uniform_real_distribution rdist(0., .5);
     double const r = rdist(seed);
 
-    uniform_real_distribution<double> sdist(0.0, 0.5-r);
-    Hex<double> const rhex{-R-S-r-sdist(seed), R+r};
+    std::uniform_real_distribution sdist(0., .5-r);
+    hexd const rhex{-R-S-r-sdist(seed), R+r};
 
-    Hex<short> const expected{(short)(-R-S), R};
-    auto ihex = hex_round<short>(rhex);
-    EXPECT_EQ(ihex, expected) << "rhex: " << rhex << "\n";
+    hex const expected_val{-R-S, R};
+    auto ihex = hex_round<int>(rhex);
+    EXPECT_EQ(ihex, expected_val);
 }
 
 TEST(HexRoundTest, LeftUpCenterQNegative) {
-    random_device seed;
-    uniform_int_distribution<short> idist(-127, -51);
-    uniform_real_distribution<float> rdist(0.334, 0.499);
+    std::random_device seed;
+    std::uniform_int_distribution idist(-127, -51);
+    std::uniform_real_distribution rdist(0.334f, 0.499f);
 
-    short const Q = idist(seed);
+    int const Q = idist(seed);
     float const s = rdist(seed);
-    Hex<float> const rhex{Q-s, 0};
+    hexf const rhex{Q-s, 0};
 
-    Hex<short> const expected{Q, 0};
-    auto ihex = hex_round<short>(rhex);
-    EXPECT_EQ(ihex, expected);
+    hex const expected_val{Q, 0};
+    auto ihex = hex_round<int>(rhex);
+    EXPECT_EQ(ihex, expected_val);
 }
 
 TEST(HexRoundTest, ForwardLeftCenterRNegative) {
-    random_device seed;
-    uniform_int_distribution<short> idist(-512, -128);
-    uniform_real_distribution<long double> rdist(0.3334, 0.4999);
+    std::random_device seed;
+    std::uniform_int_distribution idist(-512, -128);
+    std::uniform_real_distribution rdist(.3334l, .4999l);
 
-    short const R = idist(seed);
+    int const R = idist(seed);
     long double const s = rdist(seed);
-    Hex<long double> const rhex{0, R-s};
+    basic_hex<long double> const rhex{0, R-s};
 
-    Hex<short> const expected{0, R};
-    auto ihex = hex_round<short>(rhex);
-    EXPECT_EQ(ihex, expected);
+    hex const expected_val{0, R};
+    auto ihex = hex_round<int>(rhex);
+    EXPECT_EQ(ihex, expected_val);
 }
 
 TEST(HexRoundTest, ForwardDownQSNegativeRPositive) {
-    random_device seed;
-    uniform_int_distribution<long> cdist{-2048, -513};
-    uniform_real_distribution<double> qdist{0, 0.5};
+    std::random_device seed;
+    std::uniform_int_distribution cdist{-2048l, -513l};
+    std::uniform_real_distribution qdist{0., .5};
 
-    long const Q = cdist(seed);
-    long const S = cdist(seed);
+    auto const Q = cdist(seed);
+    auto const S = cdist(seed);
 
-    double const q = qdist(seed);
-    double const rub = q-0.5;
-    double const rlb = max(2*q-1, 0.5*q-0.5);
+    auto const q = qdist(seed);
+    auto const rub = q-.5;
+    auto const rlb = std::max(2.*q-1., .5*q-.5);
 
-    uniform_real_distribution<double> rdist{rlb, rub};
-    double const r = rdist(seed);
-    Hex<double> const rhex{Q+q, -Q-S+r};
+    std::uniform_real_distribution rdist{rlb, rub};
+    auto const r = rdist(seed);
+    hexd const rhex{Q+q, -Q-S+r};
 
-    Hex<long> const expected{Q, -Q-S};
+    long_hex const expected_val{Q, -Q-S};
     auto ihex = hex_round<long>(rhex);
-    EXPECT_EQ(ihex, expected);
+    EXPECT_EQ(ihex, expected_val);
 }
 
 TEST(HexRoundTest, RightDownQSPositiveRNegative) {
-    random_device seed;
-    uniform_int_distribution<long> cdist{128, 512};
-    uniform_real_distribution<float> qdist{0.0f, 0.5f};
+    std::random_device seed;
+    std::uniform_int_distribution cdist{128l, 512l};
+    std::uniform_real_distribution qdist{0.f, 0.5f};
 
-    long const Q = cdist(seed);
-    long const S = cdist(seed);
+    auto const Q = cdist(seed);
+    auto const S = cdist(seed);
 
-    float const q = qdist(seed);
-    float const sub = q-0.5f;
-    float const slb = max(2.0f*q-1.0f, 0.5f*q-0.5f);
+    auto const q = qdist(seed);
+    auto const sub = q-0.5f;
+    auto const slb = std::max(2.f*q-1.f, 0.5f*q-0.5f);
 
-    uniform_real_distribution<float> sdist{slb, sub};
-    float const s = sdist(seed);
-    Hex<float> const rhex{Q+q, -Q-S-q-s};
+    std::uniform_real_distribution sdist{slb, sub};
+    auto const s = sdist(seed);
+    hexf const rhex{Q+q, -Q-S-q-s};
 
-    Hex<long> const expected{Q, -Q-S};
+    long_hex const expected_val{Q, -Q-S};
     auto ihex = hex_round<long>(rhex);
-    EXPECT_EQ(ihex, expected);
+    EXPECT_EQ(ihex, expected_val);
 }
 
 TEST(HexRoundTest, BackUpQPositiveRSNegative) {
-    random_device seed;
-    uniform_int_distribution<long> cdist {-4096, -1024};
-    uniform_real_distribution<long double> qdist{-0.5, 0};
+    std::random_device seed;
+    std::uniform_int_distribution cdist {-4096l, -1024l};
+    std::uniform_real_distribution qdist{-.5l, 0.l};
 
     long const R = cdist(seed);
     long const S = cdist(seed);
 
     long double const q = qdist(seed);
     long double const rlb = q + 0.5l;
-    long double const rub = min(2.0l*q+1.0l, 0.5l*q+0.5l);
+    long double const rub = std::min(2.l*q+1.l, 0.5l*q+0.5l);
 
-    uniform_real_distribution<long double> rdist{rlb, rub};
+    std::uniform_real_distribution rdist{rlb, rub};
     long double const r = rdist(seed);
-    Hex<long double> const rhex{-R-S+q, R+r};
+    basic_hex<long double> const rhex{-R-S+q, R+r};
 
-    Hex<long> const expected{-R-S, R};
+    long_hex const expected_val{-R-S, R};
     auto ihex = hex_round<long>(rhex);
-    EXPECT_EQ(ihex, expected);
+    EXPECT_EQ(ihex, expected_val);
 }

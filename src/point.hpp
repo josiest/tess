@@ -1,17 +1,11 @@
 #pragma once
+#include "fields.hpp"
 
 #include <concepts>
-#include <type_traits>
-#include <stdexcept>
 #include <cmath>
+#include <functional>
 
 namespace tess {
-
-template<typename Field>
-concept numeric_field = requires{
-    requires std::floating_point<Field> or std::integral<Field>;
-    requires not std::same_as<Field, bool>;
-};
 
 /**
  * A represenatation of a cartesian point.
@@ -45,9 +39,9 @@ struct basic_point {
 
     const Field x, y;
 };
-using point = basic_point<float>;
+using point = basic_point<int>;
+using pointf = basic_point<float>;
 using pointd = basic_point<double>;
-using int_point = basic_point<int>;
 
 /**
  * Calculate the 2D euclidean norm of p as a double.

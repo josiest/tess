@@ -3,8 +3,10 @@
 #include "hex.hpp"
 
 #include <type_traits>
-#include <cmath>
 #include <stdexcept>
+
+#include <cmath>
+#include <vector>
 #include <valarray>
 
 namespace tess {
@@ -64,9 +66,9 @@ public:
     I unit_size() const noexcept { return _unit_size; }
 
     /** Convert `hex` to a point in screen space. */
-    basic_point<I> pixel(const Hex<I>& hex) const noexcept
+    basic_point<I> pixel(const basic_hex<I>& hex) const noexcept
     {
-        std::valarray<R> hexv{R(hex.q()), R(hex.r())};
+        std::valarray<R> hexv{R(hex.q), R(hex.r)};
 
         auto x = _basis[std::slice(0, 2, 1)] * hexv;
         auto y = _basis[std::slice(2, 2, 1)] * hexv;
@@ -84,7 +86,7 @@ public:
      * hould be rounded to represent a meaningful hex coordinate. See
      * `hex_round` for a function that performs this rounding.
      */
-    Hex<R> hex(const basic_point<I>& p) const noexcept
+    basic_hex<R> hex(const basic_point<I>& p) const noexcept
     {
         auto p2 = p - _origin;
         std::valarray<R> pv{R(p2.x), R(p2.y)};
@@ -92,11 +94,11 @@ public:
         auto q = _inverse[std::slice(0, 2, 1)] * pv;
         auto r = _inverse[std::slice(2, 2, 1)] * pv;
 
-        return Hex<R>(q.sum(), r.sum());
+        return basic_hex{ q.sum(), r.sum() };
     }
 
     /** Calculate the vertices of `hex` in screen space. */
-    std::vector<basic_point<I>> vertices(const Hex<I>& hex) const noexcept
+    std::vector<basic_point<I>> vertices(const basic_hex<I>& hex) const noexcept
     {
         auto center = pixel(hex);
         std::vector<basic_point<I>> verts;
