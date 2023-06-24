@@ -1,18 +1,20 @@
 #include "tess/tess.hpp"
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <ranges>
+
+namespace views = std::views;
 
 // convert a hex coordinate to an sfml shape
-sf::ConvexShape hex_shape(const tess::Basis<float>& basis, const tess::Hex<>& hex)
+sf::ConvexShape hex_shape(const tess::Basis<float>& basis,
+                          const tess::Hex<>& hex)
 {
     sf::ConvexShape shape{6};
-
-    // calcualte the vertices
-    auto verts = basis.vertices(hex);
+    const auto verts = basis.vertices(hex);
 
     // add each vertex to the shape
-    for (int i = 0; i < verts.size(); i++) {
-        shape.setPoint(i, sf::Vector2f(verts[i].x(), verts[i].y()));
+    for (const int i : views::iota(0, 6)) {
+        shape.setPoint(i, sf::Vector2f(verts[i].x, verts[i].y));
     }
     return shape;
 }
@@ -29,7 +31,8 @@ int main(int argc, char * argv[])
                             sf::Style::Titlebar | sf::Style::Close};
 
     // Create the basis for the grid, centered in the middle of the screen
-    tess::Basis<float> basis{tess::Point<>(width/2, height/2), unit_size};
+    tess::Basis<float> basis{ tess::int_point{ width/2, height/2 },
+                              unit_size };
 
     // initialize the hexes we're working with
     // and set some basic graphical settings

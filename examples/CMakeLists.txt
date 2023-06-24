@@ -1,6 +1,7 @@
 # set cmake and compiler options
 cmake_minimum_required(VERSION 3.8)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 project(tess_example)
 
 # find the SFML library

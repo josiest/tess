@@ -4,18 +4,19 @@
 #include <optional>
 #include <unordered_set>
 #include <vector>
+#include <ranges>
+
+namespace views = std::views;
 
 // convert a hex coordinate to sfml shape
-sf::ConvexShape hex_shape(const tess::Basis<float>& basis, const tess::Hex<>& hex)
+sf::ConvexShape hex_shape(const tess::Basis<float>& basis,
+                          const tess::Hex<>& hex)
 {
     sf::ConvexShape shape{6};
-
-    // calcualte the vertices
-    auto verts = basis.vertices(hex);
-
+    const auto verts = basis.vertices(hex);
     // add each vertex to the shape
-    for (int i = 0; i < verts.size(); i++) {
-        shape.setPoint(i, sf::Vector2f(verts[i].x(), verts[i].y()));
+    for (const int i : views::iota(0, 6)) {
+        shape.setPoint(i, sf::Vector2f(verts[i].x, verts[i].y));
     }
     return shape;
 }
@@ -33,7 +34,8 @@ int main(int argc, char * argv[])
                             sf::Style::Titlebar | sf::Style::Close};
 
     // Create the basis for the grid - centered in the middle of the screen
-    tess::Basis<float> basis{tess::Point<>(width/2, height/2), unit_size};
+    tess::Basis<float> basis{ tess::int_point{ width/2, height/2 },
+                              unit_size };
 
     // hovered will keep track of which hex the mouse is currently over
     std::optional<tess::Hex<>> hovered = std::nullopt;
@@ -67,8 +69,8 @@ int main(int argc, char * argv[])
             case sf::Event::MouseMoved: {
                 // convert the sfml point to a tess point
                 // and round it to the nearest hex
-                tess::Point<> hovered_pixel{event.mouseMove.x,
-                                           event.mouseMove.y};
+                tess::int_point hovered_pixel{ event.mouseMove.x,
+                                               event.mouseMove.y };
                 hovered = tess::hex_round<int>(basis.hex(hovered_pixel));
 
                 // if the mouse button is down, update the line from the
@@ -77,7 +79,7 @@ int main(int argc, char * argv[])
                     auto tiles = tess::line(*clicked, *hovered);
                     clicked_range =
                         std::unordered_set<tess::Hex<>>(tiles.begin(),
-                                                       tiles.end());
+                                                        tiles.end());
                 }
             }
             break;
@@ -86,8 +88,8 @@ int main(int argc, char * argv[])
                 // keep track of the clicked coordinate
                 // when the mouse button gets pressed
                 if (event.mouseButton.button == sf::Mouse::Button::Left) {
-                    tess::Point<> clicked_pixel{event.mouseButton.x,
-                                               event.mouseButton.y};
+                    tess::int_point clicked_pixel{ event.mouseButton.x,
+                                                   event.mouseButton.y };
                     clicked = tess::hex_round<int>(basis.hex(clicked_pixel));
                 }
             }

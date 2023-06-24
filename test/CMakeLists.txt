@@ -10,3 +10,6 @@ file(GLOB TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 add_executable(run_tests ${TEST_SOURCES})
 include_directories(../src)
 target_link_libraries(run_tests GTest::GTest GTest::Main)
+set_target_properties(run_tests PROPERTIES
+    CXX_STANDARD 23
+    CXX_STANDARD_REQUIRED TRUE)

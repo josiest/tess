@@ -5,10 +5,6 @@ project(tess)
 # variables for install destinations
 include(GNUInstallDirs)
 
-# specify the C++ standard
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED true)
-
 # specify the file interface
 set(tess_SRCEXT cpp)
 set(tess_INCEXT hpp)
