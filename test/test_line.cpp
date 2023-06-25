@@ -4,18 +4,18 @@
 #include <vector>
 
 using namespace tess;
-using long_hex = basic_hex<long>;
+using long_hex = hex<long>;
 
 TEST(LineTest, LengthZeroStartZero) {
-    std::vector<hex> tiles;
-    line(hex::zero, hex::zero, std::back_inserter(tiles));
+    std::vector<ihex> tiles;
+    line(ihex::zero, ihex::zero, std::back_inserter(tiles));
     ASSERT_EQ(tiles.size(), 1);
-    EXPECT_EQ(tiles[0], hex::zero);
+    EXPECT_EQ(tiles[0], ihex::zero);
 }
 
 TEST(LineTest, LengthZeroStartPositive) {
     hex start{10, 97};
-    std::vector<hex> tiles;
+    std::vector<ihex> tiles;
     line(start, start, std::back_inserter(tiles));
     ASSERT_EQ(tiles.size(), 1);
     EXPECT_EQ(tiles[0], start);
@@ -37,7 +37,7 @@ TEST(LineTest, StartComponentsOppositeSignAndAlongRAxis) {
     hex start{-86, 51};
     auto end = start - hex(0, length);
 
-    std::vector<hex> tiles;
+    std::vector<ihex> tiles;
     line(start, end, std::back_inserter(tiles));
     ASSERT_EQ(tiles.size(), length+1);
     EXPECT_EQ(tiles[0], start);
@@ -50,7 +50,7 @@ TEST(LineTest, StartOneComponentZeroOtherPositiveAlongSAxis) {
     hex const start{34, 0};
     auto const end = start + hex{-16, 16};
 
-    std::vector<hex> tiles;
+    std::vector<ihex> tiles;
     line(start, end, std::back_inserter(tiles));
     ASSERT_EQ(tiles.size(), length+1);
     EXPECT_EQ(tiles[0], start);
@@ -63,7 +63,7 @@ TEST(LineTest, RCrossNegativeS) {
     hex const start{-28, 95};
     auto const end = start + hex(1, 25);
 
-    std::vector<hex> tiles;
+    std::vector<ihex> tiles;
     line(start, end, std::back_inserter(tiles));
     ASSERT_EQ(tiles.size(), length+1);
     EXPECT_EQ(tiles[0], start);
@@ -89,7 +89,7 @@ TEST(LineTest, QCrossR) {
     hex const start{-9520, -1552};
     auto const end = start + hex(278, 96);
 
-    std::vector<hex> tiles;
+    std::vector<ihex> tiles;
     line(start, end, std::back_inserter(tiles));
     ASSERT_EQ(tiles.size(), length+1);
     EXPECT_EQ(tiles[0], start);
@@ -102,7 +102,7 @@ TEST(LineTest, NegativeQCrossNegativeR) {
     hex const start{14634, 16337};
     auto const end = start + hex(-2120, -4008);
 
-    std::vector<hex> tiles;
+    std::vector<ihex> tiles;
     line(start, end, std::back_inserter(tiles));
     ASSERT_EQ(tiles.size(), length+1);
     EXPECT_EQ(tiles[0], start);
@@ -128,7 +128,7 @@ TEST(LineTest, NegativeRCrossS) {
     hex const start{-4070, -9515};
     auto const end = start + hex(-2, -2);
 
-    std::vector<hex> tiles;
+    std::vector<ihex> tiles;
     line(start, end, std::back_inserter(tiles));
     ASSERT_EQ(tiles.size(), length+1);
     EXPECT_EQ(tiles[0], start);

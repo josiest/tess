@@ -19,7 +19,7 @@ class Basis {
 
     std::valarray<R> _basis;
     std::valarray<R> _inverse;
-    const basic_point<I> _origin;
+    const point<I> _origin;
     const I _unit_size;
     const HexTop _top;
 
@@ -34,7 +34,7 @@ public:
      * \throws std::invalid_argument if R is not a floating point type or if
      *                               unit_size is not positive.
      */
-    Basis(basic_point<I> origin, I unit_size, HexTop top = HexTop::Pointed)
+    Basis(point<I> origin, I unit_size, HexTop top = HexTop::Pointed)
 
         : _basis{4}, _inverse{4}, _origin{origin}, _unit_size{unit_size},
           _top{top}
@@ -60,20 +60,20 @@ public:
     }
 
     /** The origin of this basis in screen space (pixels). */
-    basic_point<I> origin() const noexcept { return _origin; }
+    point<I> origin() const noexcept { return _origin; }
 
     /** The unit size of this basis in pixels. */
     I unit_size() const noexcept { return _unit_size; }
 
     /** Convert `hex` to a point in screen space. */
-    basic_point<I> pixel(const basic_hex<I>& hex) const noexcept
+    point<I> nearest_pixel(const hex<I>& hex) const noexcept
     {
         std::valarray<R> hexv{R(hex.q), R(hex.r)};
 
         auto x = _basis[std::slice(0, 2, 1)] * hexv;
         auto y = _basis[std::slice(2, 2, 1)] * hexv;
 
-        basic_point<I> const p{I(std::round(x.sum())), I(std::round(y.sum()))};
+        point<I> const p{I(std::round(x.sum())), I(std::round(y.sum()))};
 
         return p + _origin;
     }
@@ -86,7 +86,7 @@ public:
      * hould be rounded to represent a meaningful hex coordinate. See
      * `hex_round` for a function that performs this rounding.
      */
-    basic_hex<R> hex(const basic_point<I>& p) const noexcept
+    hex<R> nearest_hex(const point<I>& p) const noexcept
     {
         auto p2 = p - _origin;
         std::valarray<R> pv{R(p2.x), R(p2.y)};
@@ -94,14 +94,14 @@ public:
         auto q = _inverse[std::slice(0, 2, 1)] * pv;
         auto r = _inverse[std::slice(2, 2, 1)] * pv;
 
-        return basic_hex{ q.sum(), r.sum() };
+        return hex{ q.sum(), r.sum() };
     }
 
     /** Calculate the vertices of `hex` in screen space. */
-    std::vector<basic_point<I>> vertices(const basic_hex<I>& hex) const noexcept
+    std::vector<point<I>> vertices(const hex<I>& hex) const noexcept
     {
-        auto center = pixel(hex);
-        std::vector<basic_point<I>> verts;
+        auto center = nearest_pixel(hex);
+        std::vector<point<I>> verts;
 
         R const pi = std::acos(-R(1));
         R const offset = _top == HexTop::Pointed? pi/R(6) : 0;

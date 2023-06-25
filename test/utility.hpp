@@ -1,18 +1,19 @@
 #pragma once
+#include "fields.hpp"
 #include "point.hpp"
 #include "hex.hpp"
 #include <ostream>
 
-template<tess::numeric_field Field>
-std::ostream& operator<<(std::ostream& os, const tess::basic_point<Field>& p)
+namespace tess {
+template<tess::numeric Field>
+void PrintTo(const tess::point<Field>& p, std::ostream* os)
 {
-    os << "(" << p.x << ", " << p.y << ")";
-    return os;
+    *os << "(" << p.x << ", " << p.y << ")";
 }
 
-template<tess::numeric_field Field>
-std::ostream& operator<<(std::ostream& os, const tess::basic_hex<Field>& h)
+template<tess::numeric Field>
+void PrintTo(const tess::hex<Field>& h, std::ostream* os)
 {
-    os << "(" << h.q << ", " << h.r << ", " << h.s() << ")";
-    return os;
+    *os << "(" << h.q << ", " << h.r << ", " << h.s() << ")";
+}
 }

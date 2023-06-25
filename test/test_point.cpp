@@ -7,7 +7,7 @@
 #include <cstdlib>
 
 using namespace tess;
-using long_point = basic_point<long>;
+using long_point = point<long>;
 
 TEST(PointTest, BothComponentsZeroInt) {
     double const eps = 0.0001;
@@ -18,26 +18,26 @@ TEST(PointTest, BothComponentsZeroInt) {
     EXPECT_EQ(norm(p), 0.0);
 
     auto const pn = -p;
-    EXPECT_EQ(pn, point::zero);
+    EXPECT_EQ(pn, ipoint::zero);
 
     auto const pa = p+p;
-    EXPECT_EQ(pa, point::zero);
+    EXPECT_EQ(pa, ipoint::zero);
 
     auto const ps = p-p;
-    EXPECT_EQ(ps, point::zero);
+    EXPECT_EQ(ps, ipoint::zero);
 }
 
 TEST(PointTest, BothComponentsZeroReal) {
-    pointd const p(0.0, 0.0);
+    point const p(0.0, 0.0);
     EXPECT_EQ(p.x, 0.0);
     EXPECT_EQ(p.y, 0.0);
     EXPECT_EQ(norm(p), 0.0);
 
     auto const pn = -p;
-    EXPECT_EQ(pn, pointd::zero);
+    EXPECT_EQ(pn, dpoint::zero);
 
     auto const pa = p+p;
-    EXPECT_EQ(pa, pointd::zero);
+    EXPECT_EQ(pa, dpoint::zero);
 }
 
 TEST(PointTest, OneComponentZeroOtherPositiveAndSmallInt) {
@@ -71,14 +71,14 @@ TEST(PointTest, OneComponentZeroOtherPositiveAndSmallReal) {
     std::uniform_real_distribution dist(1., 10.);
 
     double const x1 = dist(seed);
-    pointd const p1(x1, 0.0);
+    point const p1(x1, 0.0);
 
     EXPECT_LT(p1.x-x1, eps);
     EXPECT_EQ(p1.y, 0.0);
     EXPECT_LT(abs(norm(p1)-x1), eps);
 
     double const x2 = dist(seed);
-    pointd const p2(x2, 0.0);
+    point const p2(x2, 0.0);
     auto const p12a = p1+p2;
 
     EXPECT_LT(p12a.x-(x1+x2), eps);
@@ -132,7 +132,7 @@ TEST(PointTest, BothComponentsPositiveAndLargeWithSmallDifferenceReal) {
     float const y1 = 87.2481;
     float const x1 = y1 - 1.51828;
     double const norm1 = sqrt(x1*x1 + y1*y1);
-    pointf const p1(x1, y1);
+    point const p1(x1, y1);
 
     EXPECT_LT(p1.x-x1, eps);
     EXPECT_LT(p1.y-y1, eps);
@@ -141,7 +141,7 @@ TEST(PointTest, BothComponentsPositiveAndLargeWithSmallDifferenceReal) {
 
     float const x2 = x1 + 8.17967;
     float const y2 = y2 + 2.19761;
-    pointf const p2(x2, y2);
+    point const p2(x2, y2);
 
     double const norm12a = sqrt((x1+x2)*(x1+x2) + (y1+y2)*(y1+y2));
     auto const p12a = p1 + p2;
@@ -196,13 +196,13 @@ TEST(PointTest, XPositiveInfinityYFinite) {
 
     auto const ry1 = rdist(seed);
     constexpr auto long_inf = std::numeric_limits<long double>::infinity();
-    basic_point const rp1(long_inf, ry1);
+    point const rp1(long_inf, ry1);
     EXPECT_EQ(rp1.x, long_inf);
     EXPECT_EQ(norm(rp1), long_inf);
 
     auto const rx2 = rdist(seed);
     auto const ry2 = rdist(seed);
-    basic_point const rp2(rx2, ry2);
+    point const rp2(rx2, ry2);
 
     auto const rp12a = rp1+rp2;
     EXPECT_EQ(rp12a.x, long_inf);
@@ -217,7 +217,7 @@ TEST(PointTest, XFiniteAndYNegativeInfinity) {
     std::uniform_real_distribution dist(float_min, float_max);
 
     float const x1 = dist(seed);
-    pointf const p1(x1, -std::numeric_limits<float>::infinity());
+    point const p1(x1, -std::numeric_limits<float>::infinity());
     EXPECT_EQ(p1.x, x1);
     EXPECT_EQ(p1.y, -std::numeric_limits<float>::infinity());
     EXPECT_EQ(norm(p1), std::numeric_limits<float>::infinity());
@@ -228,7 +228,7 @@ TEST(PointTest, XFiniteAndYNegativeInfinity) {
     EXPECT_EQ(norm(p1n), std::numeric_limits<double>::infinity());
 
     float const x2 = dist(seed);
-    pointf const p2(x2, dist(seed));
+    point const p2(x2, dist(seed));
 
     auto const p12s = p1-p2;
     EXPECT_EQ(p12s.x, x1-x2);
@@ -238,7 +238,7 @@ TEST(PointTest, XFiniteAndYNegativeInfinity) {
 
 TEST(PointTest, PointZero) {
     point const expected_val{0, 0};
-    EXPECT_EQ(point::zero, expected_val);
+    EXPECT_EQ(ipoint::zero, expected_val);
 }
 
 TEST(PointTest, PointLeft) {
@@ -247,16 +247,16 @@ TEST(PointTest, PointLeft) {
 }
 
 TEST(PointTest, PointUp) {
-    pointd const expected_val{0.0, 1.0};
-    EXPECT_LT(norm(pointd::up-expected_val), 0.0001);
+    point const expected_val{0.0, 1.0};
+    EXPECT_LT(norm(dpoint::up-expected_val), 0.0001);
 }
 
 TEST(PointTest, PointRight) {
-    pointf const expected_val{1.0f, 0.0f};
-    EXPECT_LT(norm(pointf::right-expected_val), 0.001f);
+    point const expected_val{1.0f, 0.0f};
+    EXPECT_LT(norm(fpoint::right-expected_val), 0.001f);
 }
 
 TEST(PointTest, PointDown) {
-    basic_point const expected_val{0.0l, -1.0l};
-    EXPECT_LT(norm(basic_point<long double>::down-expected_val), 0.0001l);
+    point const expected_val{0.0l, -1.0l};
+    EXPECT_LT(norm(point<long double>::down-expected_val), 0.0001l);
 }

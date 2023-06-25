@@ -8,7 +8,7 @@ namespace ranges = std::ranges;
 
 // convert a hex coordinate to an sfml shape
 sf::ConvexShape hex_shape(const tess::Basis<float>& basis,
-                          const tess::hex& h)
+                          const tess::ihex& h)
 {
     sf::ConvexShape shape{6};
     const auto verts = basis.vertices(h);
@@ -41,9 +41,9 @@ int main()
     // initialize the hexes we're working with
     // and set some basic graphical settings
     constexpr std::size_t num_hexes = 37;
-    std::vector<tess::hex> hexes;
+    std::vector<tess::ihex> hexes;
     hexes.reserve(num_hexes);
-    tess::hex_range(tess::hex::zero, 3, std::back_inserter(hexes));
+    tess::hex_range(tess::ihex::zero, 3, std::back_inserter(hexes));
 
     std::vector<sf::ConvexShape> shapes;
     shapes.reserve(num_hexes);
@@ -55,7 +55,7 @@ int main()
     // std::vector<sf::ConvexShape> shapes;
     // shapes.reserve(num_hexes);
 
-    // ranges::transform(tess::hex_range(tess::hex::zero, 3),
+    // ranges::transform(tess::hex_range(tess::ihex::zero, 3),
     //                   hex_shape_fn(basis), std::back_inserter(shapes));
 
     while (window.isOpen()) {

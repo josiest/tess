@@ -1,7 +1,6 @@
 #pragma once
-#include "fields.hpp"
+#include "math.hpp"
 #include <ranges>
-#include <valarray>
 
 #include <cmath>        // abs, sqrt, sqrtf
 #include <algorithm>    // max_element
@@ -25,61 +24,77 @@ namespace tess {
  * -a;
  * \endcode
  */
-template<numeric_field Field>
-class basic_hex {
+template<numeric Field>
+class hex {
 public:
     /** The zero hex */
-    static constexpr basic_hex<Field> zero{0, 0};
+    static constexpr hex<Field> zero{0, 0};
 
     /** The hex associated with the direction "left and up" */
-    static constexpr basic_hex<Field> left_up{0, -1};
+    static constexpr hex<Field> left_up{0, -1};
 
     /** The hex associated with the direction "forward and left" */
-    static constexpr basic_hex<Field> forward_left{1, -1};
+    static constexpr hex<Field> forward_left{1, -1};
 
     /** The hex associated with the direction "forward and down" */
-    static constexpr basic_hex<Field> forward_down{1, 0};
+    static constexpr hex<Field> forward_down{1, 0};
 
     /** The hex associated with the direction "right and down" */
-    static constexpr basic_hex<Field> right_down{0, 1};
+    static constexpr hex<Field> right_down{0, 1};
 
     /** The hex associated with the direction "back and right" */
-    static constexpr basic_hex<Field> back_right{-1, 1};
+    static constexpr hex<Field> back_right{-1, 1};
 
     /** The hex associated with the direction "back and up" */
-    static constexpr basic_hex<Field> back_up{-1, 0};
+    static constexpr hex<Field> back_up{-1, 0};
+
+    constexpr auto begin() { return &q; }
+    constexpr auto begin() const { return &q; }
+    constexpr auto end() { return (&r) + 1; }
+    constexpr auto end() const { return (&r) + 1; }
+
+    template<std::output_iterator<Field> FieldOutput>
+    constexpr FieldOutput
+    cube_coordinates(FieldOutput into_coords) const noexcept
+    {
+        namespace ranges = std::ranges;
+        namespace views = std::views;
+
+        into_coords = ranges::copy(begin(), end(), into_coords).out;
+        into_coords = ranges::copy(views::single(s()), into_coords).out;
+        return into_coords;
+    }
 
     constexpr Field s() const noexcept { return -q-r; }
     Field q, r;
 };
-using hex = basic_hex<int>;
-using hexf = basic_hex<float>;
-using hexd = basic_hex<double>;
 
-template<numeric_field Field>
-bool operator==(const basic_hex<Field>& a, const basic_hex<Field>& b)
+using ihex = hex<int>;
+using fhex = hex<float>;
+using dhex = hex<double>;
+
+template<numeric Field>
+bool operator==(const hex<Field>& a, const hex<Field>& b)
 {
     return a.q == b.q and a.r == b.r;
 }
 
-template<numeric_field Field>
-basic_hex<Field> operator+(const basic_hex<Field>& a,
-                           const basic_hex<Field>& b)
+template<numeric Field>
+hex<Field> operator+(const hex<Field>& a, const hex<Field>& b)
 {
-    return basic_hex{ a.q + b.q, a.r + b.r };
+    return hex{ a.q + b.q, a.r + b.r };
 }
 
-template<numeric_field Field>
-basic_hex<Field> operator-(const basic_hex<Field>& h)
+template<numeric Field>
+hex<Field> operator-(const hex<Field>& a, const hex<Field>& b)
 {
-    return basic_hex{ -h.q, -h.r };
+    return hex{ a.q - b.q, a.r - b.r };
 }
 
-template<numeric_field Field>
-basic_hex<Field> operator-(const basic_hex<Field>& a,
-                           const basic_hex<Field>& b)
+template<numeric Field>
+hex<Field> operator-(const hex<Field>& h)
 {
-    return a + (-b);
+    return hex{ -h.q, -h.r };
 }
 
 /**
@@ -87,8 +102,8 @@ basic_hex<Field> operator-(const basic_hex<Field>& a,
  *
  * This is equivalent to \f$\frac{|h_q| + |h_r| + |h_s|}{2}\f$
  */
-template<numeric_field Field>
-Field hex_norm(const basic_hex<Field>& h) noexcept
+template<numeric Field>
+Field hex_norm(const hex<Field>& h) noexcept
 {
     return (std::abs(h.q) + std::abs(h.r) + std::abs(h.s()))/2;
 }
@@ -97,27 +112,32 @@ Field hex_norm(const basic_hex<Field>& h) noexcept
  * Calculate the hex with the minimum distance to `h` who's components are
  * integers.
  */
-template<std::integral Integer, numeric_field Field>
-basic_hex<Integer> hex_round(const basic_hex<Field>& h)
+template<std::integral Integer, numeric Field>
+requires std::convertible_to<Field, Integer>
+hex<Integer> hex_round(const hex<Field>& h)
 {
+    namespace views = std::views;
     namespace ranges = std::ranges;
 
-    // convert hex to valarray for easy operations
-    const std::valarray vals{ h.q, h.r, h.s() };
+    // convert to cube coordinates so math is easier
+    std::array<Field, 3> cube;
+    h.cube_coordinates(cube.begin());
 
     // round each component
-    auto rounded = vals;
-    auto round = [](const Field& e) { return std::round(e); };
-    ranges::transform(vals, std::begin(rounded), round);
+    std::array<Field, 3> rounded;
+    round(cube, rounded.begin());
 
     // take the difference between the original and the rounded
-    std::valarray<Field> diff{ std::abs(rounded-vals) };
+    std::array<Field, 3> diff;
+    abs(subtract(rounded, cube), diff.begin());
 
     // find the max difference and correct it
-    auto i = std::distance(std::begin(diff), ranges::max_element(diff));
-    rounded[i] -= std::accumulate(std::begin(rounded), std::end(rounded), 0);
-    return basic_hex{ static_cast<Integer>(rounded[0]),
-                      static_cast<Integer>(rounded[1]) };
+    auto i = std::distance(diff.begin(), ranges::max_element(diff));
+    rounded[i] -= std::accumulate(rounded.begin(), rounded.end(), 0);
+
+    hex<Integer> int_hex;
+    ranges::copy(views::take(rounded, 2), int_hex.begin());
+    return int_hex;
 }
 
 /**
@@ -127,10 +147,10 @@ basic_hex<Integer> hex_round(const basic_hex<Field>& h)
  * with integer components to the line segment between a and b.
  */
 template<std::integral Field,
-         std::output_iterator<basic_hex<Field>> hex_output>
+         std::output_iterator<hex<Field>> HexOutput>
 
-hex_output line(const basic_hex<Field>& a, const basic_hex<Field>& b,
-                hex_output into_hexes) noexcept
+HexOutput line(const hex<Field>& a, const hex<Field>& b,
+                HexOutput into_hexes) noexcept
 {
     namespace views = std::views;
     namespace ranges = std::ranges;
@@ -139,7 +159,7 @@ hex_output line(const basic_hex<Field>& a, const basic_hex<Field>& b,
         return start + (end - start) * t;
     };
     auto hex_lerp = [&lerp](const auto& a, const auto& b, double t) {
-        return basic_hex{ lerp(a.q, b.q, t), lerp(a.r, b.r, t) };
+        return hex{ lerp(a.q, b.q, t), lerp(a.r, b.r, t) };
     };
     const Field n = hex_norm(a-b);
     auto lerp_round = [&](int i) {
@@ -159,9 +179,9 @@ hex_output line(const basic_hex<Field>& a, const basic_hex<Field>& b,
  * \throws std::invalid_argument if r is negative.
  */
 template<std::integral Field,
-         std::output_iterator<basic_hex<Field>> hex_output>
-hex_output hex_range(const basic_hex<Field>& center, Field r,
-                     hex_output into_hexes)
+         std::output_iterator<hex<Field>> HexOutput>
+HexOutput hex_range(const hex<Field>& center, Field r,
+                    HexOutput into_hexes)
 {
     namespace ranges = std::ranges;
     namespace views = std::views;
@@ -169,7 +189,7 @@ hex_output hex_range(const basic_hex<Field>& center, Field r,
     r = std::abs(r);
     for (const auto i : views::iota(-r, r+1)) {
         auto from_center = [&](const auto j) {
-            return center + basic_hex{ i, j };
+            return center + hex{ i, j };
         };
         const auto lo = std::max(-r, -r-i);
         const auto hi = std::min(r, r-i)+1;
@@ -180,9 +200,9 @@ hex_output hex_range(const basic_hex<Field>& center, Field r,
 }
 }
 
-template <tess::numeric_field Field>
-struct std::hash<tess::basic_hex<Field>> {
-    size_t operator()(const tess::basic_hex<Field>& h) const {
+template <tess::numeric Field>
+struct std::hash<tess::hex<Field>> {
+    size_t operator()(const tess::hex<Field>& h) const {
         hash<Field> hash_field;
         size_t hq = hash_field(h.q);
         size_t hr = hash_field(h.r);

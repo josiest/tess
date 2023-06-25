@@ -11,7 +11,7 @@
 #include <cmath>    // abs
 
 using namespace tess;
-using long_hex = basic_hex<long>;
+using long_hex = hex<long>;
 
 TEST(HexTest, AllIntComponentsZero) {
     hex const h{0, 0};
@@ -21,19 +21,19 @@ TEST(HexTest, AllIntComponentsZero) {
     EXPECT_EQ(hex_norm(h), 0);
 
     auto const hexn = -h;
-    EXPECT_EQ(hexn, hex::zero);
+    EXPECT_EQ(hexn, ihex::zero);
 
     auto const hexa = h+h;
-    EXPECT_EQ(hexa, hex::zero);
+    EXPECT_EQ(hexa, ihex::zero);
 
     auto const hexs = h-h;
-    EXPECT_EQ(hexs, hex::zero);
+    EXPECT_EQ(hexs, ihex::zero);
 }
 
 TEST(HexTest, AllRealComponentsZero) {
     double const eps = 0.0001;
 
-    hexd const h(0.0, 0.0);
+    dhex const h(0.0, 0.0);
     EXPECT_EQ(h.q, 0.0);
     EXPECT_EQ(h.r, 0.0);
     EXPECT_EQ(h.s(), 0.0);
@@ -90,7 +90,7 @@ TEST(HexTest, RealOneComponentZeroOtherPositiveAndSmall) {
     std::uniform_real_distribution dist{ 1.0001, 9.9999 };
 
     double const q1 = dist(seed);
-    hexd const hex1(q1, 0.0);
+    dhex const hex1(q1, 0.0);
 
     EXPECT_LT(hex1.q-q1, eps);
     EXPECT_EQ(hex1.r, 0.0);
@@ -98,7 +98,7 @@ TEST(HexTest, RealOneComponentZeroOtherPositiveAndSmall) {
     EXPECT_LT(std::abs(hex_norm(hex1)-q1), eps);
 
     double const q2 = dist(seed);
-    hexd const hex2(q2, 0.0);
+    dhex const hex2(q2, 0.0);
 
     auto const hex12a = hex1 + hex2;
     EXPECT_LT(hex12a.q-(q1+q2), eps);
@@ -148,7 +148,7 @@ TEST(HexTest, RealComponentsDifferentMagnitudeSameSign) {
     auto const q1 = dist(seed);
     auto const r1 = dist(seed);
 
-    hexf const h1{q1, r1};
+    fhex const h1{q1, r1};
     EXPECT_EQ(h1.q, q1);
     EXPECT_EQ(h1.r, r1);
     EXPECT_LT(h1.s()+q1+r1, eps);
@@ -156,7 +156,7 @@ TEST(HexTest, RealComponentsDifferentMagnitudeSameSign) {
 
     auto const q2 = dist(seed);
     auto const r2 = dist(seed);
-    hexf const h2{q2, r2};
+    fhex const h2{q2, r2};
 
     auto const h12a = h1 + h2;
     EXPECT_LT(h12a.q-q1-q2, eps);
@@ -198,18 +198,18 @@ TEST(HexTest, IntComponentsDifferentSignAndMagnitude) {
 
 TEST(HexTest, HexZero) {
     hex expected_hex{0, 0};
-    EXPECT_EQ(hex::zero, expected_hex);
+    EXPECT_EQ(ihex::zero, expected_hex);
 }
 
 TEST(HexTest, HexLeftUp) {
     hex expected_hex{0, -1};
-    EXPECT_EQ(hex::left_up, expected_hex);
+    EXPECT_EQ(ihex::left_up, expected_hex);
     EXPECT_EQ(expected_hex.s(), 1);
 }
 
 TEST(HexTest, HexForwardLeft) {
     hex expected_hex{1, -1};
-    EXPECT_EQ(hex::forward_left, expected_hex);
+    EXPECT_EQ(ihex::forward_left, expected_hex);
     EXPECT_EQ(expected_hex.s(), 0);
 }
 
@@ -221,21 +221,21 @@ TEST(HexTest, HexForwardDown) {
 
 TEST(HexTest, HexRightDown) {
     double const eps = 0.0001;
-    hexd expected_hex{0.0, 1.0};
-    EXPECT_LT(hex_norm(hexd::right_down-expected_hex), eps);
+    dhex expected_hex{0.0, 1.0};
+    EXPECT_LT(hex_norm(dhex::right_down-expected_hex), eps);
     EXPECT_LT(std::abs(expected_hex.s()+1.0), eps);
 }
 
 TEST(HexTest, HexBackRight) {
     double const eps = 0.001;
-    hexf expected_hex{-1.0f, 1.0f};
-    EXPECT_LT(hex_norm(hexf::back_right-expected_hex), eps);
+    fhex expected_hex{-1.0f, 1.0f};
+    EXPECT_LT(hex_norm(fhex::back_right-expected_hex), eps);
     EXPECT_LT(std::abs(expected_hex.s()), eps);
 }
 
 TEST(HexTest, HexBackUp) {
     double const eps = 0.0001;
-    basic_hex<long double> expected_hex{-1.0l, 0.0l};
-    EXPECT_LT(hex_norm(basic_hex<long double>::back_up-expected_hex), eps);
+    hex expected_hex{-1.0l, 0.0l};
+    EXPECT_LT(hex_norm(hex<long double>::back_up-expected_hex), eps);
     EXPECT_LT(std::abs(expected_hex.s()-1.0), eps);
 }

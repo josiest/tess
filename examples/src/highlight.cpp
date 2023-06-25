@@ -13,7 +13,7 @@ namespace ranges = std::ranges;
 
 // convert a hex coordinate to sfml shape
 sf::ConvexShape hex_shape(const tess::Basis<float>& basis,
-                          const tess::hex& h)
+                          const tess::ihex& h)
 {
     sf::ConvexShape shape{6};
     const auto verts = basis.vertices(h);
@@ -29,16 +29,16 @@ sf::ConvexShape hex_shape(const tess::Basis<float>& basis,
 struct input_manager{
     static input_manager with_basis(int x, int y, int unit_size);
 
-    constexpr bool is_hovered(const tess::hex& h) const;
-    constexpr bool is_clicked(const tess::hex& h) const;
+    constexpr bool is_hovered(const tess::ihex& h) const;
+    constexpr bool is_clicked(const tess::ihex& h) const;
 
     void on_mouse_moved(int x, int y);
     void on_mouse_clicked(sf::Mouse::Button button, int x, int y);
     void on_mouse_released(sf::Mouse::Button button);
 
     tess::Basis<float> basis;
-    std::optional<tess::hex> hovered = std::nullopt;
-    std::vector<tess::hex> clicked;
+    std::optional<tess::ihex> hovered = std::nullopt;
+    std::vector<tess::ihex> clicked;
 };
 
 input_manager
@@ -50,12 +50,12 @@ input_manager::with_basis(int x, int y, int unit_size)
     return input;
 }
 
-constexpr bool input_manager::is_hovered(const tess::hex& h) const
+constexpr bool input_manager::is_hovered(const tess::ihex& h) const
 {
     return hovered == h;
 }
 
-constexpr bool input_manager::is_clicked(const tess::hex& h) const
+constexpr bool input_manager::is_clicked(const tess::ihex& h) const
 {
     return ranges::find(clicked, h) != ranges::end(clicked);
 }
@@ -64,7 +64,7 @@ void input_manager::on_mouse_moved(int x, int y)
 {
     // convert the sfml point to a tess point
     // and round it to the nearest hex
-    hovered = tess::hex_round<int>(basis.hex(tess::point{ x, y }));
+    hovered = tess::hex_round<int>(basis.nearest_hex(tess::point{ x, y }));
     
     // if the mouse button is down, update the line from the
     // clicked hex to the hovered hex
@@ -80,7 +80,7 @@ void input_manager::on_mouse_clicked(sf::Mouse::Button button, int x, int y)
     if (button != sf::Mouse::Button::Left) { return; }
 
     const tess::point clicked_pixel{ x, y };
-    clicked.push_back(tess::hex_round<int>(basis.hex(clicked_pixel)));
+    clicked.push_back(tess::hex_round<int>(basis.nearest_hex(clicked_pixel)));
 }
 
 void input_manager::on_mouse_released(sf::Mouse::Button button)
@@ -95,7 +95,7 @@ struct ui_manager{
 
     void draw_shapes(sf::RenderWindow& window, const input_manager& input);
 
-    std::unordered_map<tess::hex, sf::ConvexShape> shapes;
+    std::unordered_map<tess::ihex, sf::ConvexShape> shapes;
 };
 
 ui_manager
@@ -105,8 +105,8 @@ ui_manager::with_board_radius(const tess::Basis<float>& basis, int r)
 
     // initialize the set of hexes we're working with
     // and set some basic graphical settings
-    std::vector<tess::hex> hexes;
-    tess::hex_range(tess::hex::zero, r, std::back_inserter(hexes));
+    std::vector<tess::ihex> hexes;
+    tess::hex_range(tess::ihex::zero, r, std::back_inserter(hexes));
 
     ui.shapes.reserve(hexes.size());
     for (const auto& h : hexes) {

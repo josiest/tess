@@ -1,5 +1,5 @@
 #pragma once
-#include "fields.hpp"
+#include "math.hpp"
 
 #include <concepts>
 #include <cmath>
@@ -20,36 +20,42 @@ namespace tess {
  * p - q;
  * \endcode
  */
-template<numeric_field Field>
-struct basic_point {
+template<numeric Field>
+struct point {
     /** The zero point */
-    static constexpr basic_point<Field> zero{ 0, 0 };
+    static constexpr point<Field> zero{ 0, 0 };
 
     /** The unit point associated with the direction "right" */
-    static constexpr basic_point<Field> right{ 1, 0 };
+    static constexpr point<Field> right{ 1, 0 };
 
     /** The unit point associated with the direction "left" */
-    static constexpr basic_point<Field> left{ -1, 0 };
+    static constexpr point<Field> left{ -1, 0 };
 
     /** The unit point associated with the direction "up" */
-    static constexpr basic_point<Field> up{ 0, 1 };
+    static constexpr point<Field> up{ 0, 1 };
 
     /** The unit point associated with the direction "down" */
-    static constexpr basic_point<Field> down{ 0, -1 };
+    static constexpr point<Field> down{ 0, -1 };
 
-    const Field x, y;
+    constexpr auto begin() { return &x; }
+    constexpr auto begin() const { return &x; }
+
+    constexpr auto end() { return (&y) + 1; }
+    constexpr auto end() const { return (&y) + 1; }
+
+    Field x, y;
 };
-using point = basic_point<int>;
-using pointf = basic_point<float>;
-using pointd = basic_point<double>;
+using ipoint = point<int>;
+using fpoint = point<float>;
+using dpoint = point<double>;
 
 /**
  * Calculate the 2D euclidean norm of p as a double.
  *
  * This is equivalent to \f$\sqrt{p_x^2 + p_y^2}\f$
  */
-template<numeric_field Field>
-double norm(const basic_point<Field>& p) noexcept
+template<numeric Field>
+double norm(const point<Field>& p) noexcept
 {
     return std::sqrt(p.x*p.x + p.y*p.y);
 }
@@ -59,50 +65,47 @@ double norm(const basic_point<Field>& p) noexcept
  *
  * This is equivalent to \f$p \cdot p\f$ or \f$p_x^2 + p_y^2\f$.
  */
-template<numeric_field Field>
-constexpr Field sqnorm(const basic_point<Field>& p) noexcept
+template<numeric Field>
+constexpr Field sqnorm(const point<Field>& p) noexcept
 {
     return p.x*p.x + p.y*p.y;
 }
 
-template<numeric_field Field>
-constexpr basic_point<Field>
-operator+(const basic_point<Field>& p,
-          const basic_point<Field>& q)
+template<numeric Field>
+constexpr point<Field>
+operator+(const point<Field>& p, const point<Field>& q)
 {
     return { p.x + q.x, p.y + q.y };
 }
 
-template<numeric_field Field>
-constexpr basic_point<Field>
-operator-(const basic_point<Field>& p)
+template<numeric Field>
+constexpr point<Field>
+operator-(const point<Field>& p, const point<Field>& q)
+{
+    return { p.x - q.x, p.y - q.y };
+}
+
+template<numeric Field>
+constexpr point<Field>
+operator-(const point<Field>& p)
 {
     return { -p.x, -p.y };
 }
 
-template<numeric_field Field>
-constexpr basic_point<Field>
-operator-(const basic_point<Field>& p,
-          const basic_point<Field>& q)
-{
-    return p + (-q);
-}
-
-template<numeric_field Field>
+template<numeric Field>
 constexpr bool
-operator==(const basic_point<Field>& p,
-           const basic_point<Field>& q)
+operator==(const point<Field>& p, const point<Field>& q)
 {
     return p.x == q.x and p.y == q.y;
 }
 }
 
-template <tess::numeric_field Field>
-struct std::hash<tess::basic_point<Field>> {
-    size_t operator()(const tess::basic_point<Field>& p) const {
-        hash<double> hash_double;
-        const size_t px = hash_double(static_cast<double>(p.x));
-        const size_t py = hash_double(static_cast<double>(p.y));
+template <tess::numeric Field>
+struct std::hash<tess::point<Field>> {
+    std::size_t operator()(const tess::point<Field>& p) const {
+        constexpr std::hash<Field> hash_field;
+        const std::size_t px = hash_field(p.x);
+        const std::size_t py = hash_field(p.y);
         return px ^ (py + 0x9e3779b9 + (px << 6) + (px >> 2));
     }
 };

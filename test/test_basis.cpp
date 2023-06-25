@@ -3,17 +3,17 @@
 #include "tess.hpp"
 
 using namespace tess;
-using long_point = basic_point<long>;
-using long_hex = basic_hex<long>;
+using long_point = point<long>;
+using long_hex = hex<long>;
  
 TEST(BasisTest, SizeIsOneAndOriginZero) {
-    Basis<double> const basis(point::zero, 1);
-    EXPECT_EQ(basis.origin(), point::zero);
+    Basis<double> const basis(ipoint::zero, 1);
+    EXPECT_EQ(basis.origin(), ipoint::zero);
     EXPECT_EQ(basis.unit_size(), 1);
-    EXPECT_EQ(basis.pixel(hex::zero), point::zero);
-    EXPECT_LT(hex_norm(basis.hex(point::zero)), 0.0001);
+    EXPECT_EQ(basis.nearest_pixel(ihex::zero), ipoint::zero);
+    EXPECT_LT(hex_norm(basis.nearest_hex(ipoint::zero)), 0.0001);
 
-    auto const verts = basis.vertices(hex::zero);
+    auto const verts = basis.vertices(ihex::zero);
     EXPECT_LE(norm(verts[0]-point(1, 1)), 1.0);
     EXPECT_EQ(verts[1], point(0, 1));
     EXPECT_EQ(verts[2], point(-1, 1));
@@ -30,10 +30,10 @@ TEST(BasisTest, SizeIsSmallAndOriginPositive) {
     Basis<float, long> const basis{origin, unit_size};
     EXPECT_EQ(basis.origin(), origin);
     EXPECT_EQ(basis.unit_size(), unit_size);
-    EXPECT_EQ(basis.pixel(long_hex::zero), origin);
+    EXPECT_EQ(basis.nearest_pixel(long_hex::zero), origin);
 
-    auto const actual = basis.hex(long_point::zero);
-    hexf const expected_val{-0.3042, -0.2};
+    auto const actual = basis.nearest_hex(long_point::zero);
+    fhex const expected_val{-0.3042, -0.2};
     EXPECT_LT(hex_norm(actual-expected_val), eps);
 
     auto const verts = basis.vertices(long_hex::zero);
@@ -53,14 +53,14 @@ TEST(BasisTest, SizeIsLargeAndOriginNegative) {
 
     EXPECT_EQ(basis.origin(), origin);
     EXPECT_EQ(basis.unit_size(), unit_size);
-    EXPECT_EQ(basis.pixel(hex(10, 32)),
+    EXPECT_EQ(basis.nearest_pixel(hex(10, 32)),
               point(3242, 15772));
 
-    auto const actual = basis.hex(point(-75, -21));
-    basic_hex<long double> const expected_val{1.3281l, 0.57895l};
+    auto const actual = basis.nearest_hex(point(-75, -21));
+    hex<long double> const expected_val{1.3281l, 0.57895l};
     EXPECT_LT(hex_norm(actual-expected_val), eps);
 
-    auto const verts = basis.vertices(hex::zero);
+    auto const verts = basis.vertices(ihex::zero);
     EXPECT_EQ(verts[0], point(-328, -570));
     EXPECT_EQ(verts[1], point(-456, -349));
     EXPECT_EQ(verts[2], point(-711, -349));
@@ -77,10 +77,10 @@ TEST(BasisTest, OriginOneComponentNegativeOtherPositive) {
 
     EXPECT_EQ(basis.origin(), origin);
     EXPECT_EQ(basis.unit_size(), unit_size);
-    EXPECT_EQ(basis.pixel(hex(0, -32)), point(-59, -1103));
+    EXPECT_EQ(basis.nearest_pixel(hex(0, -32)), point(-59, -1103));
 
-    auto const actual = basis.hex(point(60, 0));
-    hexf const expected_val{3.7778f, -3.566f};
+    auto const actual = basis.nearest_hex(point(60, 0));
+    fhex const expected_val{3.7778f, -3.566f};
     EXPECT_LT(hex_norm(actual-expected_val), eps);
 
     auto const verts = basis.vertices(hex(46, 47));
@@ -100,10 +100,10 @@ TEST(BasisTest, OriginOneComponentZeroOtherPositive) {
 
     EXPECT_EQ(basis.origin(), origin);
     EXPECT_EQ(basis.unit_size(), unit_size);
-    EXPECT_EQ(basis.pixel(long_hex(-51, 0)), long_point(-3445, 170));
+    EXPECT_EQ(basis.nearest_pixel(long_hex(-51, 0)), long_point(-3445, 170));
 
-    auto const actual = basis.hex(long_point(0, -4));
-    hexd const expected_val{1.48718, -2.97436};
+    auto const actual = basis.nearest_hex(long_point(0, -4));
+    dhex const expected_val{1.48718, -2.97436};
     EXPECT_LT(hex_norm(actual-expected_val), eps);
 
     auto const verts = basis.vertices(long_hex(-44, -31));

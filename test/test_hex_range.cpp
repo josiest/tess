@@ -4,14 +4,14 @@
 #include <unordered_set>
 
 using namespace tess;
-using long_hex = basic_hex<long>;
+using long_hex = hex<long>;
 
 TEST(HexRangeTest, CenterZeroRadiusZero) {
-    std::unordered_set<hex> tiles;
-    hex_range(hex::zero, 0, std::inserter(tiles, std::begin(tiles)));
+    std::unordered_set<ihex> tiles;
+    hex_range(ihex::zero, 0, std::inserter(tiles, std::begin(tiles)));
     EXPECT_EQ(tiles.size(), 1);
-    EXPECT_NE(tiles.find(hex::zero), tiles.end());
-    EXPECT_EQ(tiles.find(hex::left_up), tiles.end());
+    EXPECT_NE(tiles.find(ihex::zero), tiles.end());
+    EXPECT_EQ(tiles.find(ihex::left_up), tiles.end());
 }
 
 TEST(HexRangeTest, CenterZeroRadiusPositive) {
@@ -38,7 +38,7 @@ TEST(HexRangeTest, CenterNegative) {
     int const radius = 2;
     hex const center{-17, -84};
 
-    std::unordered_set<hex> tiles;
+    std::unordered_set<ihex> tiles;
     hex_range(center, radius, std::inserter(tiles, std::begin(tiles)));
     EXPECT_EQ(tiles.size(), 19);
     EXPECT_NE(tiles.find(center), tiles.end());

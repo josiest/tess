@@ -7,12 +7,12 @@
 #include <random> // std::random_device, std::uniform_real_distribution
 
 using namespace tess;
-using long_hex = basic_hex<long>;
+using long_hex = hex<long>;
 
 TEST(HexRoundTest, AllComponentsZero) {
-    hexd const rhex{0., 0.};
-    auto ihex = hex_round<int>(rhex);
-    EXPECT_EQ(ihex, hex::zero);
+    dhex const rhex{0., 0.};
+    auto h = hex_round<int>(rhex);
+    EXPECT_EQ(h, ihex::zero);
 }
 
 TEST(HexRoundTest, CenterZeroQCrossR) {
@@ -21,10 +21,10 @@ TEST(HexRoundTest, CenterZeroQCrossR) {
     auto const q = qdist(seed);
 
     std::uniform_real_distribution rdist(0.f, 0.5f-q);
-    hexf const rhex{q, rdist(seed)};
+    fhex const rhex{q, rdist(seed)};
 
-    auto ihex = hex_round<int>(rhex);
-    EXPECT_EQ(ihex, hex::zero);
+    auto h = hex_round<int>(rhex);
+    EXPECT_EQ(h, ihex::zero);
 }
 
 TEST(HexRoundTest, CenterPositiveQCrossS) {
@@ -38,11 +38,11 @@ TEST(HexRoundTest, CenterPositiveQCrossS) {
     auto const q = qdist(seed);
 
     std::uniform_real_distribution sdist(0.l, .5l-q);
-    basic_hex rhex{Q+q, -Q-S-q-sdist(seed)};
+    hex rhex{Q+q, -Q-S-q-sdist(seed)};
 
     hex const expected_val{Q, -Q-S};
-    auto ihex = hex_round<int>(rhex);
-    EXPECT_EQ(ihex, expected_val);
+    auto h = hex_round<int>(rhex);
+    EXPECT_EQ(h, expected_val);
 }
 
 TEST(HexRoundTest, CenterNegativeRCrossS) {
@@ -56,11 +56,11 @@ TEST(HexRoundTest, CenterNegativeRCrossS) {
     double const r = rdist(seed);
 
     std::uniform_real_distribution sdist(0., .5-r);
-    hexd const rhex{-R-S-r-sdist(seed), R+r};
+    dhex const rhex{-R-S-r-sdist(seed), R+r};
 
     hex const expected_val{-R-S, R};
-    auto ihex = hex_round<int>(rhex);
-    EXPECT_EQ(ihex, expected_val);
+    auto h = hex_round<int>(rhex);
+    EXPECT_EQ(h, expected_val);
 }
 
 TEST(HexRoundTest, LeftUpCenterQNegative) {
@@ -70,11 +70,11 @@ TEST(HexRoundTest, LeftUpCenterQNegative) {
 
     int const Q = idist(seed);
     float const s = rdist(seed);
-    hexf const rhex{Q-s, 0};
+    fhex const rhex{Q-s, 0};
 
     hex const expected_val{Q, 0};
-    auto ihex = hex_round<int>(rhex);
-    EXPECT_EQ(ihex, expected_val);
+    auto h = hex_round<int>(rhex);
+    EXPECT_EQ(h, expected_val);
 }
 
 TEST(HexRoundTest, ForwardLeftCenterRNegative) {
@@ -84,11 +84,11 @@ TEST(HexRoundTest, ForwardLeftCenterRNegative) {
 
     int const R = idist(seed);
     long double const s = rdist(seed);
-    basic_hex<long double> const rhex{0, R-s};
+    hex<long double> const rhex{0, R-s};
 
     hex const expected_val{0, R};
-    auto ihex = hex_round<int>(rhex);
-    EXPECT_EQ(ihex, expected_val);
+    auto h = hex_round<int>(rhex);
+    EXPECT_EQ(h, expected_val);
 }
 
 TEST(HexRoundTest, ForwardDownQSNegativeRPositive) {
@@ -105,11 +105,11 @@ TEST(HexRoundTest, ForwardDownQSNegativeRPositive) {
 
     std::uniform_real_distribution rdist{rlb, rub};
     auto const r = rdist(seed);
-    hexd const rhex{Q+q, -Q-S+r};
+    dhex const rhex{Q+q, -Q-S+r};
 
     long_hex const expected_val{Q, -Q-S};
-    auto ihex = hex_round<long>(rhex);
-    EXPECT_EQ(ihex, expected_val);
+    auto h = hex_round<long>(rhex);
+    EXPECT_EQ(h, expected_val);
 }
 
 TEST(HexRoundTest, RightDownQSPositiveRNegative) {
@@ -126,11 +126,11 @@ TEST(HexRoundTest, RightDownQSPositiveRNegative) {
 
     std::uniform_real_distribution sdist{slb, sub};
     auto const s = sdist(seed);
-    hexf const rhex{Q+q, -Q-S-q-s};
+    fhex const rhex{Q+q, -Q-S-q-s};
 
     long_hex const expected_val{Q, -Q-S};
-    auto ihex = hex_round<long>(rhex);
-    EXPECT_EQ(ihex, expected_val);
+    auto h = hex_round<long>(rhex);
+    EXPECT_EQ(h, expected_val);
 }
 
 TEST(HexRoundTest, BackUpQPositiveRSNegative) {
@@ -147,9 +147,9 @@ TEST(HexRoundTest, BackUpQPositiveRSNegative) {
 
     std::uniform_real_distribution rdist{rlb, rub};
     long double const r = rdist(seed);
-    basic_hex<long double> const rhex{-R-S+q, R+r};
+    hex<long double> const rhex{-R-S+q, R+r};
 
     long_hex const expected_val{-R-S, R};
-    auto ihex = hex_round<long>(rhex);
-    EXPECT_EQ(ihex, expected_val);
+    auto h = hex_round<long>(rhex);
+    EXPECT_EQ(h, expected_val);
 }
