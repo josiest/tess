@@ -5,6 +5,9 @@
 #include <stdexcept>
 #include <valarray>
 
+#include "hex.hpp"
+#include "point.hpp"
+
 namespace tess {
 
 enum class HexTop { Flat, Pointed };
@@ -15,7 +18,7 @@ class Basis {
 
     std::valarray<R> _basis;
     std::valarray<R> _inverse;
-    const Point<I> _origin;
+    const point<I> _origin;
     const I _unit_size;
     const HexTop _top;
 
@@ -30,7 +33,7 @@ public:
      * \throws std::invalid_argument if R is not a floating point type or if
      *                               unit_size is not positive.
      */
-    Basis(Point<I> origin, I unit_size, HexTop top = HexTop::Pointed)
+    Basis(point<I> origin, I unit_size, HexTop top = HexTop::Pointed)
 
         : _basis{4}, _inverse{4}, _origin{origin}, _unit_size{unit_size},
           _top{top}
@@ -56,20 +59,20 @@ public:
     }
 
     /** The origin of this basis in screen space (pixels). */
-    Point<I> origin() const noexcept { return Point<I>{_origin}; }
+    point<I> origin() const noexcept { return point<I>{_origin}; }
 
     /** The unit size of this basis in pixels. */
     I unit_size() const noexcept { return _unit_size; }
 
     /** Convert `hex` to a point in screen space. */
-    Point<I> pixel(const Hex<I>& hex) const noexcept
+    point<I> pixel(const Hex<I>& hex) const noexcept
     {
         std::valarray<R> hexv{R(hex.q()), R(hex.r())};
 
         auto x = _basis[std::slice(0, 2, 1)] * hexv;
         auto y = _basis[std::slice(2, 2, 1)] * hexv;
 
-        Point<I> const p{I(std::round(x.sum())), I(std::round(y.sum()))};
+        point<I> const p{I(std::round(x.sum())), I(std::round(y.sum()))};
 
         return p + _origin;
     }
@@ -82,10 +85,10 @@ public:
      * hould be rounded to represent a meaningful hex coordinate. See
      * `hex_round` for a function that performs this rounding.
      */
-    Hex<R> hex(const Point<I>& p) const noexcept
+    Hex<R> hex(const point<I>& p) const noexcept
     {
         auto p2 = p - _origin;
-        std::valarray<R> pv{R(p2.x()), R(p2.y())};
+        std::valarray<R> pv{R(p2.x), R(p2.y)};
 
         auto q = _inverse[std::slice(0, 2, 1)] * pv;
         auto r = _inverse[std::slice(2, 2, 1)] * pv;
@@ -94,10 +97,10 @@ public:
     }
 
     /** Calculate the vertices of `hex` in screen space. */
-    std::vector<Point<I>> vertices(const Hex<I>& hex) const noexcept
+    std::vector<point<I>> vertices(const Hex<I>& hex) const noexcept
     {
         auto center = pixel(hex);
-        std::vector<Point<I>> verts;
+        std::vector<point<I>> verts;
 
         R const pi = std::acos(-R(1));
         R const offset = _top == HexTop::Pointed? pi/R(6) : 0;
@@ -111,8 +114,9 @@ public:
             // convert the angle to unit vector, then scale and offset
             std::valarray<R> v{std::cos(theta), std::sin(theta)};
             v *= _unit_size;
-            v += std::valarray<R>{R(center.x()), R(center.y())};
-            verts.emplace_back(I(std::round(v[0])), I(std::round(v[1])));
+            v += std::valarray<R>{R(center.x), R(center.y)};
+            verts.push_back({ static_cast<I>(std::round(v[0])),
+                              static_cast<I>(std::round(v[1])) });
         }
         return verts;
     }

@@ -13,7 +13,7 @@ sf::ConvexShape hex_shape(const tess::Basis<float>& basis,
 
     // add each vertex to the shape
     for (int i = 0; i < verts.size(); i++) {
-        shape.setPoint(i, sf::Vector2f(verts[i].x(), verts[i].y()));
+        shape.setPoint(i, sf::Vector2f(verts[i].x, verts[i].y));
     }
     return shape;
 }
@@ -30,7 +30,7 @@ int main(int argc, char * argv[])
                             sf::Style::Titlebar | sf::Style::Close};
 
     // Create the basis for the grid, centered in the middle of the screen
-    tess::Basis<float> basis{tess::Point<>(width/2, height/2), unit_size};
+    tess::Basis<float> basis{tess::point{width/2, height/2}, unit_size};
 
     // initialize the hexes we're working with
     // and set some basic graphical settings

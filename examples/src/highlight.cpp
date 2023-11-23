@@ -15,7 +15,7 @@ sf::ConvexShape hex_shape(const tess::Basis<float>& basis, const tess::Hex<>& he
 
     // add each vertex to the shape
     for (int i = 0; i < verts.size(); i++) {
-        shape.setPoint(i, sf::Vector2f(verts[i].x(), verts[i].y()));
+        shape.setPoint(i, sf::Vector2f(verts[i].x, verts[i].y));
     }
     return shape;
 }
@@ -33,7 +33,7 @@ int main(int argc, char * argv[])
                             sf::Style::Titlebar | sf::Style::Close};
 
     // Create the basis for the grid - centered in the middle of the screen
-    tess::Basis<float> basis{tess::Point<>(width/2, height/2), unit_size};
+    tess::Basis<float> basis{tess::point{width/2, height/2}, unit_size};
 
     // hovered will keep track of which hex the mouse is currently over
     std::optional<tess::Hex<>> hovered = std::nullopt;
@@ -67,8 +67,8 @@ int main(int argc, char * argv[])
             case sf::Event::MouseMoved: {
                 // convert the sfml point to a tess point
                 // and round it to the nearest hex
-                tess::Point<> hovered_pixel{event.mouseMove.x,
-                                           event.mouseMove.y};
+                tess::point hovered_pixel{ event.mouseMove.x,
+                                           event.mouseMove.y };
                 hovered = tess::hex_round<int>(basis.hex(hovered_pixel));
 
                 // if the mouse button is down, update the line from the
@@ -86,8 +86,8 @@ int main(int argc, char * argv[])
                 // keep track of the clicked coordinate
                 // when the mouse button gets pressed
                 if (event.mouseButton.button == sf::Mouse::Button::Left) {
-                    tess::Point<> clicked_pixel{event.mouseButton.x,
-                                               event.mouseButton.y};
+                    tess::point clicked_pixel{ event.mouseButton.x,
+                                               event.mouseButton.y };
                     clicked = tess::hex_round<int>(basis.hex(clicked_pixel));
                 }
             }
