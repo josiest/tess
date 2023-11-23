@@ -49,18 +49,8 @@ template<typename T = int>
          * Create the hex <q, r, -q-r>.
          * \throws std::invalid_argument if q or r are infinite or NaN
          */
-        constexpr Hex(T q, T r)
-            :_q(q), _r(r)
+        constexpr Hex(T q, T r) :_q(q), _r(r)
         {
-            static_assert(std::is_arithmetic<T>::value,
-                          "T must be a numeric type");
-
-            if (std::isnan(q) || !std::isfinite(q)) {
-                throw std::invalid_argument{"q must be a valid number"};
-            }
-            if (std::isnan(r) || !std::isfinite(r)) {
-                throw std::invalid_argument{"r must be a valid number"};
-            }
         }
         
         /** Construct a copy of hex */
@@ -76,26 +66,34 @@ template<typename T = int>
         T s() const noexcept { return -_q-_r; }
 
         /** The zero hex */
-        static Hex<T> constexpr zero{0, 0};
+        static Hex<T> const zero;
 
         /** The hex associated with the direction "left and up" */
-        static Hex<T> constexpr left_up{0, -1};
+        static Hex<T> const left_up;
 
         /** The hex associated with the direction "forward and left" */
-        static Hex<T> constexpr forward_left{1, -1};
+        static Hex<T> const forward_left;
 
         /** The hex associated with the direction "forward and down" */
-        static Hex<T> constexpr forward_down{1, 0};
+        static Hex<T> const forward_down;
 
         /** The hex associated with the direction "right and down" */
-        static Hex<T> constexpr right_down{0, 1};
+        static Hex<T> const right_down;
 
         /** The hex associated with the direction "back and right" */
-        static Hex<T> constexpr back_right{-1, 1};
+        static Hex<T> const back_right;
 
         /** The hex associated with the direction "back and up" */
-        static Hex<T> constexpr back_up{-1, 0};
+        static Hex<T> const back_up;
     };
+
+template<typename T> constexpr Hex<T> const Hex<T>::zero{0, 0};
+template<typename T> constexpr Hex<T> const Hex<T>::left_up{0, -1};
+template<typename T> constexpr Hex<T> const Hex<T>::forward_left{1, -1};
+template<typename T> constexpr Hex<T> const Hex<T>::forward_down{1, 0};
+template<typename T> constexpr Hex<T> const Hex<T>::right_down{0, 1};
+template<typename T> constexpr Hex<T> const Hex<T>::back_right{-1, 1};
+template<typename T> constexpr Hex<T> const Hex<T>::back_up{-1, 0};
 
 /**
  * Calculate the hex norm of h.

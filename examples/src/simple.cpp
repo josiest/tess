@@ -3,7 +3,8 @@
 #include <vector>
 
 // convert a hex coordinate to an sfml shape
-sf::ConvexShape hex_shape(const tess::Basis<float>& basis, const tess::Hex<>& hex)
+sf::ConvexShape hex_shape(const tess::Basis<float>& basis,
+                          const tess::Hex<>& hex)
 {
     sf::ConvexShape shape{6};
 

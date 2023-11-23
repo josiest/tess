@@ -44,18 +44,7 @@ template<typename T = int>
          * Create a representation of a cartesian point at (x, y).
          * \throws std::invalid_argument if x or y are NaN
          */
-        constexpr Point(T x, T y) :_x(x), _y(y)
-        {
-            static_assert(std::is_arithmetic<T>::value,
-                          "T must be a numeric type");
-
-            if (std::isnan(x)) {
-                throw std::invalid_argument{"x must be a valid number"};
-            }
-            if (std::isnan(y)) {
-                throw std::invalid_argument{"y must be a valid number"};
-            }
-        }
+        constexpr Point(T x, T y) :_x(x), _y(y) { }
 
         /** Create a copy of p. */
         constexpr Point(const Point<T> &p) : _x{p.x()}, _y{p.y()} {}
@@ -67,20 +56,26 @@ template<typename T = int>
         inline T y() const noexcept { return _y; }
 
         /** The zero point */
-        static Point<T> constexpr zero{0, 0};
+        static Point<T> const zero;
 
         /** The unit point associated with the direction "right" */
-        static Point<T> constexpr right{1, 0};
+        static Point<T> const right;
 
         /** The unit point associated with the direction "left" */
-        static Point<T> constexpr left{-1, 0};
+        static Point<T> const left;
 
         /** The unit point associated with the direction "up" */
-        static Point<T> constexpr up{0, 1};
+        static Point<T> const up;
 
         /** The unit point associated with the direction "down" */
-        static Point<T> constexpr down{0, -1};
+        static Point<T> const down;
     };
+
+template<typename T> constexpr Point<T> const Point<T>::zero{0, 0};
+template<typename T> constexpr Point<T> const Point<T>::right{1, 0};
+template<typename T> constexpr Point<T> const Point<T>::left{-1, 0};
+template<typename T> constexpr Point<T> const Point<T>::up{0, 1};
+template<typename T> constexpr Point<T> const Point<T>::down{0, -1};
     
 /**
  * Calculate the 2D euclidean norm of p as a double.

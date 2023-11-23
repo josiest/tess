@@ -1,0 +1,3 @@
+# ignore installed library
+include/
+lib/
