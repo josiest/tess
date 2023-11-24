@@ -1,24 +1,22 @@
 #include "tess/tess.hpp"
 #include <SFML/Graphics.hpp>
-#include <unordered_map>
+
+#include <concepts>
 #include <optional>
+
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
-using int_point = tess::point<int>;
-
 // convert a hex coordinate to sfml shape
+template<std::integral Integer>
 sf::ConvexShape hex_shape(const tess::pointed_fbasis& basis,
-                          const tess::hex<int>& hex)
+                          const tess::hex<Integer>& hex)
 {
     sf::ConvexShape shape{6};
-
-    // calcualte the vertices
-    auto verts = basis.vertices<int_point>(hex);
-
-    // add each vertex to the shape
+    auto verts = basis.vertices<sf::Vector2f>(hex);
     for (int i = 0; i < verts.size(); i++) {
-        shape.setPoint(i, sf::Vector2f(verts[i].x, verts[i].y));
+        shape.setPoint(i, verts[i]);
     }
     return shape;
 }
@@ -51,10 +49,10 @@ int main(int argc, char * argv[])
     // and set some basic graphical settings
     std::unordered_map<tess::hex<int>, sf::ConvexShape> shapes;
     for (const auto& hex : tess::hex_range(tess::hex<int>::zero, 30)) {
-        auto shape = hex_shape(basis, hex);
+        auto [mapping, _] = shapes.emplace(hex, hex_shape(basis, hex));
+        auto& shape = mapping->second;
         shape.setOutlineColor(sf::Color::Black);
         shape.setOutlineThickness(1.0f);
-        shapes[hex] = shape;
     }
 
     while (window.isOpen()) {

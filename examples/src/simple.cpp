@@ -1,7 +1,6 @@
 #include "tess/tess.hpp"
 #include <SFML/Graphics.hpp>
 #include <vector>
-
 #include <concepts>
 
 // convert a hex coordinate to an sfml shape
