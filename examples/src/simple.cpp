@@ -4,20 +4,19 @@
 
 #include <concepts>
 
-using int_point = tess::point<int>;
-
 // convert a hex coordinate to an sfml shape
+template<std::integral Integer>
 sf::ConvexShape hex_shape(const tess::pointed_fbasis& basis,
-                          const tess::hex<int>& hex)
+                          const tess::hex<Integer>& hex)
 {
     sf::ConvexShape shape{6};
+    // if sf::Shape had begin() -> output_iterator<Vector2f>
+    // basis.vertices(hex, shape.begin());
 
-    // calcualte the vertices
-    auto verts = basis.vertices<int_point>(hex);
-
-    // add each vertex to the shape
+    // compute the vertices for the shape
+    auto verts = basis.vertices<sf::Vector2f>(hex);
     for (int i = 0; i < verts.size(); i++) {
-        shape.setPoint(i, sf::Vector2f(verts[i].x, verts[i].y));
+        shape.setPoint(i, verts[i]);
     }
     return shape;
 }
@@ -40,10 +39,9 @@ int main(int argc, char * argv[])
     // and set some basic graphical settings
     std::vector<sf::ConvexShape> shapes;
     for (const auto& hex : tess::hex_range(tess::hex<int>::zero, 3)) {
-        auto shape = hex_shape(basis, hex);
+        auto& shape = shapes.emplace_back(hex_shape(basis, hex));
         shape.setOutlineColor(sf::Color::Black);
         shape.setOutlineThickness(1.0f);
-        shapes.push_back(shape);
     }
 
     while (window.isOpen()) {

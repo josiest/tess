@@ -2,9 +2,9 @@
 
 #include <type_traits>
 #include <cmath>
-#include <stdexcept>
 #include <valarray>
 #include <concepts>
+#include <numbers>
 
 #include "math.hpp"
 #include "hex.hpp"
@@ -53,8 +53,8 @@ public:
     R unit_size() const noexcept { return _unit_size; }
 
     /** Convert `hex` to a point in screen space. */
-    template<cartesian Point>
-    Point pixel(tess::hex<scalar_field_t<Point>> const & h) const noexcept
+    template<cartesian Point, axial Hex>
+    Point pixel(Hex const & h) const noexcept
     {
         std::valarray<R> hexv{ static_cast<R>(h.q), static_cast<R>(h.r) };
         std::valarray<R> const hx = _basis[std::slice(0, 2, 1)] * hexv;
@@ -93,21 +93,21 @@ public:
     }
 
     /** Calculate the vertices of `hex` in screen space. */
-    template<cartesian Point>
+    template<cartesian Point, axial Hex>
     std::vector<Point>
-    vertices(tess::hex<scalar_field_t<Point>> const & h) const noexcept
+    vertices(Hex const & h) const noexcept
     {
         auto center = pixel<Point>(h);
         std::vector<Point> verts;
 
-        R const pi = std::acos(-R(1));
-        R const offset = TopStyle == HexTop::Pointed? pi/R(6) : 0;
+        R constexpr pi = std::numbers::pi_v<R>;
+        R const offset = TopStyle == HexTop::Pointed? pi/6 : 0;
 
         // add each vertex to the list
         for (int i = 0; i < 6; ++i) {
 
             // calculate the angle of the vertex
-            R theta = offset + i * pi/R(3);
+            R theta = offset + i * pi/3;
 
             // convert the angle to unit vector, then scale and offset
             std::valarray<R> v{std::cos(theta), std::sin(theta)};
