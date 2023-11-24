@@ -5,13 +5,16 @@
 #include <unordered_set>
 #include <vector>
 
+using int_point = tess::point<int>;
+
 // convert a hex coordinate to sfml shape
-sf::ConvexShape hex_shape(const tess::Basis<float>& basis, const tess::Hex<>& hex)
+sf::ConvexShape hex_shape(const tess::pointed_fbasis& basis,
+                          const tess::Hex<>& hex)
 {
     sf::ConvexShape shape{6};
 
     // calcualte the vertices
-    auto verts = basis.vertices(hex);
+    auto verts = basis.vertices<int_point>(hex);
 
     // add each vertex to the shape
     for (int i = 0; i < verts.size(); i++) {
@@ -24,16 +27,16 @@ int main(int argc, char * argv[])
 {
     // local variables to use for the screen width and height and the unit
     // size of the grid
-    int const width = 800;
-    int const height = 600;
-    int const unit_size = 30;
+    float const width = 800.f;
+    float const height = 600.f;
+    float const unit_size = 30.f;
 
     // Create the window, but make sure it's not resizeable
     sf::RenderWindow window{sf::VideoMode(width, height), "tess example",
                             sf::Style::Titlebar | sf::Style::Close};
 
     // Create the basis for the grid - centered in the middle of the screen
-    tess::Basis<float> basis{tess::point{width/2, height/2}, unit_size};
+    tess::pointed_fbasis basis{width/2.f, height/2.f, unit_size};
 
     // hovered will keep track of which hex the mouse is currently over
     std::optional<tess::Hex<>> hovered = std::nullopt;

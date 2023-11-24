@@ -4,6 +4,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <valarray>
+#include <concepts>
 
 #include "hex.hpp"
 #include "point.hpp"
@@ -12,16 +13,26 @@ namespace tess {
 
 enum class HexTop { Flat, Pointed };
 
-template<typename R = double, typename I = int>
-/** An abstract data type for converting to and from screen space and hex space. */
+template<typename T>
+concept numeric = std::integral<T> or std::floating_point<T>;
+
+template<typename Point>
+concept point2d = requires(const Point p) {
+    Point{};
+    Point{p.x, p.y};
+    numeric<std::remove_cvref_t<decltype(p.x)>>;
+    std::same_as<std::remove_cvref_t<decltype(p.x)>,
+                 std::remove_cvref_t<decltype(p.y)>>;
+};
+
+template<point2d Point>
+using scalar_field_t =
+    std::remove_reference_t<decltype(std::declval<Point>().x)>;
+
+
+template<std::floating_point R, HexTop TopStyle>
+/** An abstract data type for converting to and from screen and hex space. */
 class Basis {
-
-    std::valarray<R> _basis;
-    std::valarray<R> _inverse;
-    const point<I> _origin;
-    const I _unit_size;
-    const HexTop _top;
-
 public:
 
     /**
@@ -33,20 +44,13 @@ public:
      * \throws std::invalid_argument if R is not a floating point type or if
      *                               unit_size is not positive.
      */
-    Basis(point<I> origin, I unit_size, HexTop top = HexTop::Pointed)
+    Basis(R x, R y, R unit_size)
 
-        : _basis{4}, _inverse{4}, _origin{origin}, _unit_size{unit_size},
-          _top{top}
+        : _basis{4}, _inverse{4}, x{x}, y{y},
+          _unit_size{unit_size}
     {
-        if (!std::is_floating_point<R>::value) {
-            throw std::invalid_argument{"R must be floating point"};
-        }
-        if (unit_size <= 0) {
-            throw std::invalid_argument{"unit_size must be positive"};
-        }
-
         R sqrt3 = std::sqrt(R(3));
-        if (top == HexTop::Pointed) {
+        if (TopStyle == HexTop::Pointed) {
             _basis = {sqrt3, sqrt3/2, 0, 3/R(2)};
             _inverse = {sqrt3/3, -1/R(3), 0, 2/R(3)};
         }
@@ -59,22 +63,28 @@ public:
     }
 
     /** The origin of this basis in screen space (pixels). */
-    point<I> origin() const noexcept { return point<I>{_origin}; }
+    template<point2d Point>
+    Point origin() const noexcept { return Point{x, y}; }
 
     /** The unit size of this basis in pixels. */
-    I unit_size() const noexcept { return _unit_size; }
+    R unit_size() const noexcept { return _unit_size; }
 
     /** Convert `hex` to a point in screen space. */
-    point<I> pixel(const Hex<I>& hex) const noexcept
+    template<point2d Point>
+    Point pixel(const Hex<scalar_field_t<Point>>& hex) const noexcept
     {
-        std::valarray<R> hexv{R(hex.q()), R(hex.r())};
+        std::valarray<R> hexv{ static_cast<R>(hex.q()),
+                               static_cast<R>(hex.r()) };
 
-        auto x = _basis[std::slice(0, 2, 1)] * hexv;
-        auto y = _basis[std::slice(2, 2, 1)] * hexv;
+        std::valarray<R> const hx = _basis[std::slice(0, 2, 1)] * hexv;
+        std::valarray<R> const hy = _basis[std::slice(2, 2, 1)] * hexv;
 
-        point<I> const p{I(std::round(x.sum())), I(std::round(y.sum()))};
+        using Scalar = scalar_field_t<Point>;
+        Point const p{ static_cast<Scalar>(std::round(hx.sum())),
+                       static_cast<Scalar>(std::round(hy.sum())) };
 
-        return p + _origin;
+        return Point{ p.x+static_cast<Scalar>(x),
+                      p.y+static_cast<Scalar>(y) };
     }
 
     /**
@@ -85,10 +95,15 @@ public:
      * hould be rounded to represent a meaningful hex coordinate. See
      * `hex_round` for a function that performs this rounding.
      */
-    Hex<R> hex(const point<I>& p) const noexcept
+    template<point2d Point>
+    Hex<R> hex(const Point& p) const noexcept
     {
-        auto p2 = p - _origin;
-        std::valarray<R> pv{R(p2.x), R(p2.y)};
+        using Scalar = scalar_field_t<Point>;
+        Point const p2{ p.x-static_cast<Scalar>(x),
+                        p.y-static_cast<Scalar>(y) };
+
+        std::valarray<R> pv{ static_cast<R>(p2.x),
+                             static_cast<R>(p2.y) };
 
         auto q = _inverse[std::slice(0, 2, 1)] * pv;
         auto r = _inverse[std::slice(2, 2, 1)] * pv;
@@ -97,13 +112,15 @@ public:
     }
 
     /** Calculate the vertices of `hex` in screen space. */
-    std::vector<point<I>> vertices(const Hex<I>& hex) const noexcept
+    template<point2d Point>
+    std::vector<Point>
+    vertices(const Hex<scalar_field_t<Point>>& hex) const noexcept
     {
-        auto center = pixel(hex);
-        std::vector<point<I>> verts;
+        auto center = pixel<Point>(hex);
+        std::vector<Point> verts;
 
         R const pi = std::acos(-R(1));
-        R const offset = _top == HexTop::Pointed? pi/R(6) : 0;
+        R const offset = TopStyle == HexTop::Pointed? pi/R(6) : 0;
 
         // add each vertex to the list
         for (int i = 0; i < 6; ++i) {
@@ -114,11 +131,27 @@ public:
             // convert the angle to unit vector, then scale and offset
             std::valarray<R> v{std::cos(theta), std::sin(theta)};
             v *= _unit_size;
-            v += std::valarray<R>{R(center.x), R(center.y)};
-            verts.push_back({ static_cast<I>(std::round(v[0])),
-                              static_cast<I>(std::round(v[1])) });
+            v += std::valarray<R>{ static_cast<R>(center.x),
+                                   static_cast<R>(center.y) };
+
+            using Scalar = scalar_field_t<Point>;
+            verts.push_back({ static_cast<Scalar>(std::round(v[0])),
+                              static_cast<Scalar>(std::round(v[1])) });
         }
         return verts;
     }
+
+private:
+    std::valarray<R> _basis;
+    std::valarray<R> _inverse;
+
+    R x; R y;
+    R _unit_size;
 };
+
+template<HexTop TopStyle>
+using fbasis = Basis<float, TopStyle>;
+
+using flat_fbasis = Basis<float, HexTop::Flat>;
+using pointed_fbasis = Basis<float, HexTop::Pointed>;
 }

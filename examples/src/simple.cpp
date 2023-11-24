@@ -2,14 +2,18 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 
+#include <concepts>
+
+using int_point = tess::point<int>;
+
 // convert a hex coordinate to an sfml shape
-sf::ConvexShape hex_shape(const tess::Basis<float>& basis,
+sf::ConvexShape hex_shape(const tess::pointed_fbasis& basis,
                           const tess::Hex<>& hex)
 {
     sf::ConvexShape shape{6};
 
     // calcualte the vertices
-    auto verts = basis.vertices(hex);
+    auto verts = basis.vertices<int_point>(hex);
 
     // add each vertex to the shape
     for (int i = 0; i < verts.size(); i++) {
@@ -20,17 +24,17 @@ sf::ConvexShape hex_shape(const tess::Basis<float>& basis,
 
 int main(int argc, char * argv[])
 {
-    // local variabeles for screen width and height and grid unit size
-    int const width = 800;
-    int const height = 600;
-    int const unit_size = 50;
+    // local variables for screen width and height and grid unit size
+    float const width = 800.f;
+    float const height = 600.f;
+    float const unit_size = 50.f;
 
     // Create the window, but make sure it's not resizeable
     sf::RenderWindow window{sf::VideoMode(width, height), "tess simple example",
                             sf::Style::Titlebar | sf::Style::Close};
 
     // Create the basis for the grid, centered in the middle of the screen
-    tess::Basis<float> basis{tess::point{width/2, height/2}, unit_size};
+    tess::pointed_fbasis basis{width/2.f, height/2.f, unit_size};
 
     // initialize the hexes we're working with
     // and set some basic graphical settings
