@@ -129,26 +129,23 @@ hex<Integer> hex_round(const hex<Real>& h)
  * The coordinates are calculated by finding the the nearest hex coordinates
  * with integer components to the line segment between a and b.
  */
-template<std::integral Integer>
-std::vector<hex<Integer>>
-line(const hex<Integer>& a, const hex<Integer>& b) noexcept
+template<axial Hex, std::indirectly_writable<Hex> Out>
+requires std::integral<scalar_field_t<Hex>> and std::weakly_incrementable<Out>
+auto line(const Hex& a, const Hex& b, Out into_hexes) noexcept
 {
+    using Integer = scalar_field_t<Hex>;
     auto lerp = [](double a, double b, double t) {
         return a + (b - a) * t;
     };
-    auto hex_lerp = [&lerp](const hex<Integer>& a,
-                            const hex<Integer>& b, double t) {
-
-        return hex{ lerp(a.q, b.q, t),
-                    lerp(a.r, b.r, t) };
+    auto hex_lerp = [&lerp](const Hex& a, const Hex& b, double t) {
+        return hex{ lerp(a.q, b.q, t), lerp(a.r, b.r, t) };
     };
 
-    std::vector<hex<Integer>> tiles{a};
     Integer const n = hex_norm(a-b);
     for (int i = 1; i <= n; i++) {
-        tiles.push_back(hex_round<Integer>(hex_lerp(a, b, i/(double)n)));
+        *into_hexes++ = hex_round<Integer>(hex_lerp(a, b, i/(double)n));
     }
-    return tiles;
+    return into_hexes;
 }
 
 /**

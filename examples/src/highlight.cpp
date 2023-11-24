@@ -81,10 +81,10 @@ int main(int argc, char * argv[])
                 // if the mouse button is down, update the line from the
                 // clicked hex to the hovered hex
                 if (clicked) {
-                    auto tiles = tess::line(*clicked, *hovered);
-                    clicked_range =
-                        std::unordered_set<tess::hex<int>>(tiles.begin(),
-                                                           tiles.end());
+                    clicked_range.clear();
+                    auto into_clicked = std::inserter(clicked_range,
+                                                      clicked_range.begin());
+                    tess::line(*clicked, *hovered, into_clicked);
                 }
             }
             break;
