@@ -2,6 +2,7 @@
 #include <cmath>
 #include <concepts>
 #include <functional>
+#include "math.hpp"
 
 namespace tess {
 
@@ -53,7 +54,7 @@ public:
     static point<Field> const down;
 };
 
-template<typename Field>
+template<numeric Field>
 point(Field, Field) -> point<Field>;
 
 template<typename Field> constexpr point<Field> const point<Field>::zero{0, 0};

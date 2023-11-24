@@ -8,7 +8,7 @@ using int_point = tess::point<int>;
 
 // convert a hex coordinate to an sfml shape
 sf::ConvexShape hex_shape(const tess::pointed_fbasis& basis,
-                          const tess::Hex<>& hex)
+                          const tess::hex<int>& hex)
 {
     sf::ConvexShape shape{6};
 
@@ -39,7 +39,7 @@ int main(int argc, char * argv[])
     // initialize the hexes we're working with
     // and set some basic graphical settings
     std::vector<sf::ConvexShape> shapes;
-    for (const auto& hex : tess::hex_range(tess::Hex<>::zero, 3)) {
+    for (const auto& hex : tess::hex_range(tess::hex<int>::zero, 3)) {
         auto shape = hex_shape(basis, hex);
         shape.setOutlineColor(sf::Color::Black);
         shape.setOutlineThickness(1.0f);

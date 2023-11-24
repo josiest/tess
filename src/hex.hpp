@@ -1,14 +1,14 @@
 #pragma once
 
-#include <ostream>
 #include <type_traits>  // is_arithmetic
-#include <stdexcept>    // invalid_argument
 #include <cmath>        // abs, sqrt, sqrtf
 #include <algorithm>    // max_element
 #include <unordered_set>
 #include <numeric>
 #include <valarray>
 #include <vector>
+
+#include "math.hpp"
 
 namespace tess {
 
@@ -18,8 +18,8 @@ namespace tess {
  * Hexes may be printed, added, subtracted and negated
  *
  * \code{.cpp}
- * Hex<int> const h1(1, 2);
- * Hex<int> const h2(3, 4);
+ * hex<int> const h1(1, 2);
+ * hex<int> const h2(3, 4);
  *
  * std::cout << (h1+h2) << '\n';
  * std::cout << (h1-h2) << '\n';
@@ -39,98 +39,89 @@ namespace tess {
  * std::is_arithmetic<T>::value
  * \endcode
  */
-template<typename T = int>
-    class Hex {
-        T _q, _r;
-    
-    public:
+template<numeric Field>
+struct hex {
+    /** The s component of this hex. */
+    Field s() const noexcept { return -q-r; }
+    Field q, r;
 
-        /**
-         * Create the hex <q, r, -q-r>.
-         * \throws std::invalid_argument if q or r are infinite or NaN
-         */
-        constexpr Hex(T q, T r) :_q(q), _r(r)
-        {
-        }
-        
-        /** Construct a copy of hex */
-        constexpr Hex(const Hex<T>& hex) noexcept :_q{hex.q()}, _r{hex.r()} {}
+    /** The zero hex */
+    static hex<Field> const zero;
 
-        /** The q component of this hex. */
-        T q() const noexcept { return _q; }
+    /** The hex associated with the direction "left and up" */
+    static hex<Field> const left_up;
 
-        /** The r component of this hex. */
-        T r() const noexcept { return _r; }
+    /** The hex associated with the direction "forward and left" */
+    static hex<Field> const forward_left;
 
-        /** The s component of this hex. */
-        T s() const noexcept { return -_q-_r; }
+    /** The hex associated with the direction "forward and down" */
+    static hex<Field> const forward_down;
 
-        /** The zero hex */
-        static Hex<T> const zero;
+    /** The hex associated with the direction "right and down" */
+    static hex<Field> const right_down;
 
-        /** The hex associated with the direction "left and up" */
-        static Hex<T> const left_up;
+    /** The hex associated with the direction "back and right" */
+    static hex<Field> const back_right;
 
-        /** The hex associated with the direction "forward and left" */
-        static Hex<T> const forward_left;
+    /** The hex associated with the direction "back and up" */
+    static hex<Field> const back_up;
+};
 
-        /** The hex associated with the direction "forward and down" */
-        static Hex<T> const forward_down;
+template<numeric Field>
+constexpr hex<Field> const hex<Field>::zero{0, 0};
+template<numeric Field>
+constexpr hex<Field> const hex<Field>::left_up{0, -1};
+template<numeric Field>
+constexpr hex<Field> const hex<Field>::forward_left{1, -1};
+template<numeric Field>
+constexpr hex<Field> const hex<Field>::forward_down{1, 0};
+template<numeric Field>
+constexpr hex<Field> const hex<Field>::right_down{0, 1};
+template<numeric Field>
+constexpr hex<Field> const hex<Field>::back_right{-1, 1};
+template<numeric Field>
+constexpr hex<Field> const hex<Field>::back_up{-1, 0};
 
-        /** The hex associated with the direction "right and down" */
-        static Hex<T> const right_down;
-
-        /** The hex associated with the direction "back and right" */
-        static Hex<T> const back_right;
-
-        /** The hex associated with the direction "back and up" */
-        static Hex<T> const back_up;
-    };
-
-template<typename T> constexpr Hex<T> const Hex<T>::zero{0, 0};
-template<typename T> constexpr Hex<T> const Hex<T>::left_up{0, -1};
-template<typename T> constexpr Hex<T> const Hex<T>::forward_left{1, -1};
-template<typename T> constexpr Hex<T> const Hex<T>::forward_down{1, 0};
-template<typename T> constexpr Hex<T> const Hex<T>::right_down{0, 1};
-template<typename T> constexpr Hex<T> const Hex<T>::back_right{-1, 1};
-template<typename T> constexpr Hex<T> const Hex<T>::back_up{-1, 0};
+template<numeric Field>
+hex(Field, Field) -> hex<Field>;
 
 /**
  * Calculate the hex norm of h.
  *
  * This is equivalent to \f$\frac{|h_q| + |h_r| + |h_s|}{2}\f$
  */
-template<typename T>
-    T hex_norm(const Hex<T>& h) noexcept
-    {
-        return (std::abs(h.q()) + std::abs(h.r()) + std::abs(h.s()))/2;
-    }
+template<numeric Field>
+Field hex_norm(const hex<Field>& h) noexcept
+{
+    return (std::abs(h.q) + std::abs(h.r) + std::abs(h.s()))/2;
+}
 
 /**
  * Calculate the hex with the minimum distance to `h` who's components are
  * integers.
  */
-template<typename I, typename R>
-    Hex<I> hex_round(const tess::Hex<R>& h)
-    {
-        // convert hex to valarray for easy operations
-        std::valarray<R> v{h.q(), h.r(), h.s()};
+template<std::integral Integer, std::floating_point Real>
+hex<Integer> hex_round(const hex<Real>& h)
+{
+    // convert hex to valarray for easy operations
+    std::valarray<Real> v{h.q, h.r, h.s()};
 
-        // round each component
-        auto rv = v;
-        std::transform(std::begin(v), std::end(v), std::begin(rv),
-                       [](R& e) { return std::round(e); });
+    // round each component
+    auto rv = v;
+    std::transform(std::begin(v), std::end(v), std::begin(rv),
+                   [](Real e) { return std::round(e); });
 
-        // take the difference between the original and the rounded
-        std::valarray<R> dv{std::abs(rv-v)};
+    // take the difference between the original and the rounded
+    std::valarray<Real> dv{std::abs(rv-v)};
 
-        // find the max difference and correct it
-        auto i = std::distance(std::begin(dv),
-                               std::max_element(std::begin(dv), std::end(dv)));
-        rv[i] -= std::accumulate(std::begin(rv), std::end(rv), 0);
+    // find the max difference and correct it
+    auto i = std::distance(std::begin(dv),
+                           std::max_element(std::begin(dv), std::end(dv)));
+    rv[i] -= std::accumulate(std::begin(rv), std::end(rv), 0);
 
-        return Hex<I>(static_cast<I>(rv[0]), static_cast<I>(rv[1]));
-    }
+    return hex<Integer>{static_cast<Integer>(rv[0]),
+                        static_cast<Integer>(rv[1])};
+}
 
 /**
  * Calculate the hex coordinates in a "straight" line segment from `a` to `b`.
@@ -138,23 +129,27 @@ template<typename I, typename R>
  * The coordinates are calculated by finding the the nearest hex coordinates
  * with integer components to the line segment between a and b.
  */
-template<typename I>
-    std::vector<Hex<I>> line(const Hex<I>& a, const Hex<I>& b) noexcept
-    {
-        auto lerp = [](double a, double b, double t) {
-            return a + (b - a) * t;
-        };
-        auto hex_lerp = [&lerp](const Hex<I>& a, const Hex<I>& b, double t) {
-            return Hex<double>(lerp(a.q(), b.q(), t), lerp(a.r(), b.r(), t));
-        };
+template<std::integral Integer>
+std::vector<hex<Integer>>
+line(const hex<Integer>& a, const hex<Integer>& b) noexcept
+{
+    auto lerp = [](double a, double b, double t) {
+        return a + (b - a) * t;
+    };
+    auto hex_lerp = [&lerp](const hex<Integer>& a,
+                            const hex<Integer>& b, double t) {
 
-        std::vector<Hex<I>> tiles{a};
-        I n = hex_norm(a-b);
-        for (int i = 1; i <= n; i++) {
-            tiles.push_back(hex_round<I>(hex_lerp(a, b, i/(double)n)));
-        }
-        return tiles;
+        return hex{ lerp(a.q, b.q, t),
+                    lerp(a.r, b.r, t) };
+    };
+
+    std::vector<hex<Integer>> tiles{a};
+    Integer const n = hex_norm(a-b);
+    for (int i = 1; i <= n; i++) {
+        tiles.push_back(hex_round<Integer>(hex_lerp(a, b, i/(double)n)));
     }
+    return tiles;
+}
 
 /**
  * Calculate the set of hex coordinates within radius `r` of `center`.
@@ -164,61 +159,52 @@ template<typename I>
  *
  * \throws std::invalid_argument if r is negative.
  */
-template<typename I>
-    std::unordered_set<Hex<I>> hex_range(const Hex<I>& center, I r)
-    {
-        if (r < 0) {
-            throw std::invalid_argument{"r must be non-negative"};
+template<std::integral Integer>
+std::unordered_set<hex<Integer>>
+hex_range(const hex<Integer>& center, Integer r)
+{
+    std::unordered_set<hex<Integer>> tiles;
+    for (Integer i = -r; i <= r; ++i) {
+        for (Integer j = std::max(-r, -r-i); j <= std::min(r, r-i); j++) {
+            tiles.insert(center + hex<Integer>{i, j});
         }
-        std::unordered_set<Hex<I>> tiles;
-        for (I i = -r; i <= r; i++) {
-            for (I j = std::max(-r, -r-i); j <= std::min(r, I(r-i)); j++) {
-                tiles.insert(center + Hex<I>(i, j));
-            }
-        }
-        return tiles;
     }
+    return tiles;
+}
 
-template<typename T>
-    bool operator==(const Hex<T>& a, const Hex<T>& b)
-    {
-        return a.q()==b.q() && a.r()==b.r();
-    }
+template<numeric Field>
+bool operator==(const hex<Field>& a, const hex<Field>& b)
+{
+    return a.q == b.q and a.r == b.r;
+}
 
-template<typename T>
-    Hex<T> operator+(const Hex<T>& a, const Hex<T>& b)
-    {
-        return Hex<T>(a.q()+b.q(), a.r()+b.r());
-    }
+template<numeric Field>
+hex<Field> operator+(const hex<Field>& a, const hex<Field>& b)
+{
+    return hex<Field>{a.q+b.q, a.r+b.r};
+}
 
-template<typename T>
-    Hex<T> operator-(const Hex<T>& h)
-    {
-        return Hex<T>(-h.q(), -h.r());
-    }
+template<numeric Field>
+hex<Field> operator-(const hex<Field>& h)
+{
+    return hex<Field>{-h.q, -h.r};
+}
 
-template<typename T>
-    Hex<T> operator-(const Hex<T>& a, const Hex<T>& b)
-    {
-        return a + (-b);
-    }
-
-template<typename T>
-    std::ostream& operator<<(std::ostream& os, const Hex<T>& h)
-    {
-        os << "<" << h.q() << ", " << h.r() << ", " << h.s() << ">";
-        return os;
-    }
+template<numeric Field>
+hex<Field> operator-(const hex<Field>& a, const hex<Field>& b)
+{
+    return a + (-b);
+}
 }
 
 namespace std {
 
-template <typename T>
-    struct hash<tess::Hex<T>> {
-        size_t operator()(const tess::Hex<T>& h) const {
+template <tess::numeric Field>
+    struct hash<tess::hex<Field>> {
+        size_t operator()(const tess::hex<Field>& h) const {
             hash<double> dhash;
-            size_t hq = dhash((double)h.q());
-            size_t hr = dhash((double)h.r());
+            size_t hq = dhash(static_cast<double>(h.q));
+            size_t hr = dhash(static_cast<double>(h.r));
             return hq ^ (hr + 0x9e3779b9 + (hq << 6) + (hq >> 2));
         }
     };

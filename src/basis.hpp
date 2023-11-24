@@ -6,30 +6,13 @@
 #include <valarray>
 #include <concepts>
 
+#include "math.hpp"
 #include "hex.hpp"
 #include "point.hpp"
 
 namespace tess {
 
 enum class HexTop { Flat, Pointed };
-
-template<typename T>
-concept numeric = std::integral<T> or std::floating_point<T>;
-
-template<typename Point>
-concept point2d = requires(const Point p) {
-    Point{};
-    Point{p.x, p.y};
-    numeric<std::remove_cvref_t<decltype(p.x)>>;
-    std::same_as<std::remove_cvref_t<decltype(p.x)>,
-                 std::remove_cvref_t<decltype(p.y)>>;
-};
-
-template<point2d Point>
-using scalar_field_t =
-    std::remove_reference_t<decltype(std::declval<Point>().x)>;
-
-
 template<std::floating_point R, HexTop TopStyle>
 /** An abstract data type for converting to and from screen and hex space. */
 class Basis {
@@ -63,19 +46,17 @@ public:
     }
 
     /** The origin of this basis in screen space (pixels). */
-    template<point2d Point>
+    template<cartesian Point>
     Point origin() const noexcept { return Point{x, y}; }
 
     /** The unit size of this basis in pixels. */
     R unit_size() const noexcept { return _unit_size; }
 
     /** Convert `hex` to a point in screen space. */
-    template<point2d Point>
-    Point pixel(const Hex<scalar_field_t<Point>>& hex) const noexcept
+    template<cartesian Point>
+    Point pixel(tess::hex<scalar_field_t<Point>> const & h) const noexcept
     {
-        std::valarray<R> hexv{ static_cast<R>(hex.q()),
-                               static_cast<R>(hex.r()) };
-
+        std::valarray<R> hexv{ static_cast<R>(h.q), static_cast<R>(h.r) };
         std::valarray<R> const hx = _basis[std::slice(0, 2, 1)] * hexv;
         std::valarray<R> const hy = _basis[std::slice(2, 2, 1)] * hexv;
 
@@ -95,8 +76,8 @@ public:
      * hould be rounded to represent a meaningful hex coordinate. See
      * `hex_round` for a function that performs this rounding.
      */
-    template<point2d Point>
-    Hex<R> hex(const Point& p) const noexcept
+    template<cartesian Point>
+    tess::hex<R> hex(const Point& p) const noexcept
     {
         using Scalar = scalar_field_t<Point>;
         Point const p2{ p.x-static_cast<Scalar>(x),
@@ -108,15 +89,15 @@ public:
         auto q = _inverse[std::slice(0, 2, 1)] * pv;
         auto r = _inverse[std::slice(2, 2, 1)] * pv;
 
-        return Hex<R>(q.sum(), r.sum());
+        return tess::hex{q.sum(), r.sum()};
     }
 
     /** Calculate the vertices of `hex` in screen space. */
-    template<point2d Point>
+    template<cartesian Point>
     std::vector<Point>
-    vertices(const Hex<scalar_field_t<Point>>& hex) const noexcept
+    vertices(tess::hex<scalar_field_t<Point>> const & h) const noexcept
     {
-        auto center = pixel<Point>(hex);
+        auto center = pixel<Point>(h);
         std::vector<Point> verts;
 
         R const pi = std::acos(-R(1));

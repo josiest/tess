@@ -9,7 +9,7 @@ using int_point = tess::point<int>;
 
 // convert a hex coordinate to sfml shape
 sf::ConvexShape hex_shape(const tess::pointed_fbasis& basis,
-                          const tess::Hex<>& hex)
+                          const tess::hex<int>& hex)
 {
     sf::ConvexShape shape{6};
 
@@ -39,18 +39,18 @@ int main(int argc, char * argv[])
     tess::pointed_fbasis basis{width/2.f, height/2.f, unit_size};
 
     // hovered will keep track of which hex the mouse is currently over
-    std::optional<tess::Hex<>> hovered = std::nullopt;
+    std::optional<tess::hex<int>> hovered = std::nullopt;
 
     // clicked will keep track of which hex was clicked if mouse button is down
-    std::optional<tess::Hex<>> clicked = std::nullopt;
+    std::optional<tess::hex<int>> clicked = std::nullopt;
 
     // clicked_range will keep track of all the hexes from clicked to hovered
-    std::unordered_set<tess::Hex<>> clicked_range;
+    std::unordered_set<tess::hex<int>> clicked_range;
 
     // initialize the set of hexes we're working with
     // and set some basic graphical settings
-    std::unordered_map<tess::Hex<>, sf::ConvexShape> shapes;
-    for (const auto& hex : tess::hex_range(tess::Hex<>::zero, 30)) {
+    std::unordered_map<tess::hex<int>, sf::ConvexShape> shapes;
+    for (const auto& hex : tess::hex_range(tess::hex<int>::zero, 30)) {
         auto shape = hex_shape(basis, hex);
         shape.setOutlineColor(sf::Color::Black);
         shape.setOutlineThickness(1.0f);
@@ -79,8 +79,8 @@ int main(int argc, char * argv[])
                 if (clicked) {
                     auto tiles = tess::line(*clicked, *hovered);
                     clicked_range =
-                        std::unordered_set<tess::Hex<>>(tiles.begin(),
-                                                       tiles.end());
+                        std::unordered_set<tess::hex<int>>(tiles.begin(),
+                                                           tiles.end());
                 }
             }
             break;
@@ -103,6 +103,8 @@ int main(int argc, char * argv[])
                     clicked_range.clear();
                 }
                 break;
+
+            default: break;
             }
         }
         window.clear();
