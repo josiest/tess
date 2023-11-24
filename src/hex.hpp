@@ -5,7 +5,6 @@
 #include <algorithm>    // max_element
 #include <numeric>
 #include <valarray>
-#include <vector>
 #include <iterator>
 
 #include "math.hpp"
@@ -31,13 +30,6 @@ namespace tess {
  * > <-2, -2, 4>
  * > <-1, -2, 3>
  * ```
- *
- * Note that the generic argument must be a numeric type.
- * That is, it must satisfy
- *
- * \code{.cpp}
- * std::is_arithmetic<T>::value
- * \endcode
  */
 template<numeric Field>
 struct hex {
