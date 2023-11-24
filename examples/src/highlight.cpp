@@ -7,14 +7,17 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <array>
 
 // convert a hex coordinate to sfml shape
 template<std::integral Integer>
 sf::ConvexShape hex_shape(const tess::pointed_fbasis& basis,
                           const tess::hex<Integer>& hex)
 {
+    std::array<sf::Vector2f, 6> verts;
+    basis.vertices<sf::Vector2f>(hex, verts.begin());
+
     sf::ConvexShape shape{6};
-    auto verts = basis.vertices<sf::Vector2f>(hex);
     for (int i = 0; i < verts.size(); i++) {
         shape.setPoint(i, verts[i]);
     }

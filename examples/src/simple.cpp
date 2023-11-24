@@ -1,7 +1,9 @@
 #include "tess/tess.hpp"
 #include <SFML/Graphics.hpp>
-#include <vector>
 #include <concepts>
+
+#include <vector>
+#include <array>
 
 // convert a hex coordinate to an sfml shape
 template<std::integral Integer>
@@ -13,7 +15,8 @@ sf::ConvexShape hex_shape(const tess::pointed_fbasis& basis,
     // basis.vertices(hex, shape.begin());
 
     // compute the vertices for the shape
-    auto verts = basis.vertices<sf::Vector2f>(hex);
+    std::array<sf::Vector2f, 6> verts;
+    basis.vertices<sf::Vector2f>(hex, verts.begin());
     for (int i = 0; i < verts.size(); i++) {
         shape.setPoint(i, verts[i]);
     }

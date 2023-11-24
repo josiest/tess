@@ -93,13 +93,11 @@ public:
     }
 
     /** Calculate the vertices of `hex` in screen space. */
-    template<cartesian Point, axial Hex>
-    std::vector<Point>
-    vertices(Hex const & h) const noexcept
+    template<cartesian Point, axial Hex, std::indirectly_writable<Point> Out>
+    requires std::weakly_incrementable<Out>
+    auto vertices(Hex const & h, Out into_verts) const noexcept
     {
         auto center = pixel<Point>(h);
-        std::vector<Point> verts;
-
         R constexpr pi = std::numbers::pi_v<R>;
         R const offset = TopStyle == HexTop::Pointed? pi/6 : 0;
 
@@ -116,10 +114,10 @@ public:
                                    static_cast<R>(center.y) };
 
             using Scalar = scalar_field_t<Point>;
-            verts.push_back({ static_cast<Scalar>(std::round(v[0])),
-                              static_cast<Scalar>(std::round(v[1])) });
+            *into_verts++ = Point{ static_cast<Scalar>(std::round(v[0])),
+                                   static_cast<Scalar>(std::round(v[1])) };
         }
-        return verts;
+        return into_verts;
     }
 
 private:
