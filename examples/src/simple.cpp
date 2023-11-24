@@ -7,7 +7,7 @@
 
 // convert a hex coordinate to an sfml shape
 template<std::integral Integer>
-sf::ConvexShape hex_shape(const tess::pointed_fbasis& basis,
+sf::ConvexShape hex_shape(const tess::flat_fbasis& basis,
                           const tess::hex<Integer>& hex)
 {
     sf::ConvexShape shape{6};
@@ -35,12 +35,16 @@ int main(int argc, char * argv[])
                             sf::Style::Titlebar | sf::Style::Close};
 
     // Create the basis for the grid, centered in the middle of the screen
-    tess::pointed_fbasis basis{width/2.f, height/2.f, unit_size};
+    tess::flat_fbasis basis{width/2.f, height/2.f, unit_size};
 
     // initialize the hexes we're working with
     // and set some basic graphical settings
+    std::vector<tess::hex<int>> hexes;
+    tess::hex_range(tess::hex<int>::zero, 3, std::back_inserter(hexes));
+
     std::vector<sf::ConvexShape> shapes;
-    for (const auto& hex : tess::hex_range(tess::hex<int>::zero, 3)) {
+    shapes.reserve(hexes.size());
+    for (const auto& hex : hexes) {
         auto& shape = shapes.emplace_back(hex_shape(basis, hex));
         shape.setOutlineColor(sf::Color::Black);
         shape.setOutlineThickness(1.0f);

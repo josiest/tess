@@ -50,8 +50,11 @@ int main(int argc, char * argv[])
 
     // initialize the set of hexes we're working with
     // and set some basic graphical settings
+    std::vector<tess::hex<int>> hexes;
+    tess::hex_range(tess::hex<int>::zero, 30, std::back_inserter(hexes));
+
     std::unordered_map<tess::hex<int>, sf::ConvexShape> shapes;
-    for (const auto& hex : tess::hex_range(tess::hex<int>::zero, 30)) {
+    for (const auto& hex : hexes) {
         auto [mapping, _] = shapes.emplace(hex, hex_shape(basis, hex));
         auto& shape = mapping->second;
         shape.setOutlineColor(sf::Color::Black);

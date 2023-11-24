@@ -3,10 +3,10 @@
 #include <type_traits>  // is_arithmetic
 #include <cmath>        // abs, sqrt, sqrtf
 #include <algorithm>    // max_element
-#include <unordered_set>
 #include <numeric>
 #include <valarray>
 #include <vector>
+#include <iterator>
 
 #include "math.hpp"
 
@@ -159,17 +159,17 @@ line(const hex<Integer>& a, const hex<Integer>& b) noexcept
  *
  * \throws std::invalid_argument if r is negative.
  */
-template<std::integral Integer>
-std::unordered_set<hex<Integer>>
-hex_range(const hex<Integer>& center, Integer r)
+template<axial Hex, std::indirectly_writable<Hex> Out>
+requires std::integral<scalar_field_t<Hex>> and std::weakly_incrementable<Out>
+auto hex_range(const Hex& center, scalar_field_t<Hex> r, Out into_hexes)
 {
-    std::unordered_set<hex<Integer>> tiles;
+    using Integer = scalar_field_t<Hex>;
     for (Integer i = -r; i <= r; ++i) {
         for (Integer j = std::max(-r, -r-i); j <= std::min(r, r-i); j++) {
-            tiles.insert(center + hex<Integer>{i, j});
+            *into_hexes++ = center + Hex{i, j};
         }
     }
-    return tiles;
+    return into_hexes;
 }
 
 template<numeric Field>
