@@ -10,18 +10,18 @@ template<typename Point>
 concept cartesian = requires(const Point p) {
     Point{};
     Point{p.x, p.y};
-    numeric<std::remove_cvref_t<decltype(p.x)>>;
-    std::same_as<std::remove_cvref_t<decltype(p.x)>,
-                 std::remove_cvref_t<decltype(p.y)>>;
+    requires numeric<std::remove_cvref_t<decltype(p.x)>>;
+    requires std::same_as<std::remove_cvref_t<decltype(p.x)>,
+                          std::remove_cvref_t<decltype(p.y)>>;
 };
 
 template<typename Point>
 concept axial = requires(const Point p) {
     Point{};
     Point{p.q, p.r};
-    numeric<std::remove_cvref_t<decltype(p.q)>>;
-    std::same_as<std::remove_cvref_t<decltype(p.q)>,
-                 std::remove_cvref_t<decltype(p.r)>>;
+    requires numeric<std::remove_cvref_t<decltype(p.q)>>;
+    requires std::same_as<std::remove_cvref_t<decltype(p.q)>,
+                          std::remove_cvref_t<decltype(p.r)>>;
 };
 
 template<typename Point>
