@@ -72,3 +72,5 @@ tags
 # -- Project --
 
 build/
+.idea/
+cmake-build-debug/
