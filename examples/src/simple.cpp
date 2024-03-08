@@ -1,9 +1,18 @@
 #include "tess/tess.hpp"
+#include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
-#include <concepts>
 
 #include <vector>
 #include <array>
+#include <cstdint>
+
+struct simple_settings {
+    sf::VideoMode video_mode{ 800, 600 };
+    std::string window_name = "Simple Tess Example";
+    std::uint32_t window_style = sf::Style::Titlebar | sf::Style::Close;
+
+    float unit_size = 50.f;
+};
 
 // convert a hex coordinate to an sfml shape
 template<std::integral Integer>
@@ -23,19 +32,16 @@ sf::ConvexShape hex_shape(const tess::flat_fbasis& basis,
     return shape;
 }
 
-int main(int argc, char * argv[])
+int main()
 {
-    // local variables for screen width and height and grid unit size
-    float const width = 800.f;
-    float const height = 600.f;
-    float const unit_size = 50.f;
-
-    // Create the window, but make sure it's not resizeable
-    sf::RenderWindow window{sf::VideoMode(width, height), "tess simple example",
-                            sf::Style::Titlebar | sf::Style::Close};
+    const simple_settings settings{};
 
     // Create the basis for the grid, centered in the middle of the screen
-    tess::flat_fbasis basis{width/2.f, height/2.f, unit_size};
+    const tess::flat_fbasis basis{
+        static_cast<float>(settings.video_mode.width)/2.f,
+        static_cast<float>(settings.video_mode.height)/2.f,
+        settings.unit_size
+    };
 
     // initialize the hexes we're working with
     // and set some basic graphical settings
@@ -50,8 +56,12 @@ int main(int argc, char * argv[])
         shape.setOutlineThickness(1.0f);
     }
 
+    // Create the window, but make sure it's not resizeable
+    sf::RenderWindow window{ settings.video_mode, settings.window_name,
+                             settings.window_style };
+
     while (window.isOpen()) {
-        sf::Event event;
+        sf::Event event{};
 
         // close if exit button pressed
         while (window.pollEvent(event)) {
