@@ -8,6 +8,15 @@
 #include <unordered_set>
 #include <vector>
 #include <array>
+#include <cstdint>
+
+struct highlight_settings {
+    sf::VideoMode video_mode{ 800, 600 };
+    std::string window_name = "Tess Highlight Example";
+    std::uint32_t window_style = sf::Style::Titlebar | sf::Style::Close;
+
+    float unit_size = 30.f;
+};
 
 // convert a hex coordinate to sfml shape
 template<std::integral Integer>
@@ -24,20 +33,19 @@ sf::ConvexShape hex_shape(const tess::pointed_fbasis& basis,
     return shape;
 }
 
-int main(int argc, char * argv[])
+int main()
 {
-    // local variables to use for the screen width and height and the unit
-    // size of the grid
-    float const width = 800.f;
-    float const height = 600.f;
-    float const unit_size = 30.f;
-
     // Create the window, but make sure it's not resizeable
-    sf::RenderWindow window{sf::VideoMode(width, height), "tess example",
-                            sf::Style::Titlebar | sf::Style::Close};
+    const highlight_settings settings{};
+    sf::RenderWindow window{ settings.video_mode, settings.window_name,
+                             settings.window_style };
 
     // Create the basis for the grid - centered in the middle of the screen
-    tess::pointed_fbasis basis{width/2.f, height/2.f, unit_size};
+    tess::pointed_fbasis basis{
+        static_cast<float>(settings.video_mode.width)/2.f,
+        static_cast<float>(settings.video_mode.height)/2.f,
+        settings.unit_size
+    };
 
     // hovered will keep track of which hex the mouse is currently over
     std::optional<tess::hex<int>> hovered = std::nullopt;
@@ -62,7 +70,7 @@ int main(int argc, char * argv[])
     }
 
     while (window.isOpen()) {
-        sf::Event event;
+        sf::Event event{};
 
         while (window.pollEvent(event)) {
 
