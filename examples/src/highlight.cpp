@@ -33,6 +33,94 @@ sf::ConvexShape hex_shape(const tess::pointed_fbasis& basis,
     return shape;
 }
 
+class highlight_system {
+public:
+    explicit highlight_system(const tess::pointed_fbasis& basis);
+    void on_mouse_move(int x, int y);
+    void on_mouse_pressed(int x, int y);
+    void on_mouse_released();
+    void draw(sf::RenderWindow& window);
+
+    tess::pointed_fbasis basis;
+
+    // all hex shapes to be drawn
+    std::unordered_map<tess::hex<int>, sf::ConvexShape> shapes;
+
+    // hovered will keep track of which hex the mouse is currently over
+    std::optional<tess::hex<int>> hovered = std::nullopt;
+
+    // clicked will keep track of which hex was clicked if mouse button is down
+    std::optional<tess::hex<int>> clicked = std::nullopt;
+
+    // clicked_range will keep track of all the hexes from clicked to hovered
+    std::unordered_set<tess::hex<int>> clicked_range;
+};
+
+highlight_system::highlight_system(const tess::pointed_fbasis& basis)
+    : basis{ basis }
+{
+    // initialize the set of hexes we're working with
+    // and set some basic graphical settings
+    std::vector<tess::hex<int>> hexes;
+    tess::hex_range(tess::hex<int>::zero, 30, std::back_inserter(hexes));
+
+    for (const auto& hex : hexes) {
+        auto [mapping, _] = shapes.emplace(hex, hex_shape(basis, hex));
+        auto & shape = mapping->second;
+        shape.setOutlineColor(sf::Color::Black);
+        shape.setOutlineThickness(1.0f);
+    }
+}
+
+void highlight_system::on_mouse_move(int x, int y)
+{
+    // convert the sfml point to a tess point
+    // and round it to the nearest hex
+    tess::point hovered_pixel{ x, y };
+    hovered = tess::hex_round<int>(basis.hex(hovered_pixel));
+
+    // if the mouse button is down, update the line from the
+    // clicked hex to the hovered hex
+    if (clicked) {
+        clicked_range.clear();
+        auto into_clicked = std::inserter(clicked_range,
+                                          clicked_range.begin());
+        tess::line(*clicked, *hovered, into_clicked);
+    }
+}
+
+void highlight_system::on_mouse_pressed(int x, int y)
+{
+    // keep track of the clicked coordinate when the mouse button gets pressed
+    tess::point clicked_pixel{ x, y };
+    clicked = tess::hex_round<int>(basis.hex(clicked_pixel));
+}
+
+void highlight_system::on_mouse_released()
+{
+    // reset clicked data when the mouse button is released
+    clicked = std::nullopt;
+    clicked_range.clear();
+}
+
+void highlight_system::draw(sf::RenderWindow & window)
+{
+    for (const auto & [hex, shape] : shapes) {
+
+        // color selected tiles cyan
+        if (hex == hovered ||
+            clicked_range.find(hex) != clicked_range.end()) {
+
+            shapes[hex].setFillColor(sf::Color::Cyan);
+        }
+        // color non selected tiles white
+        else {
+            shapes[hex].setFillColor(sf::Color::White);
+        }
+        window.draw(shape);
+    }
+}
+
 int main()
 {
     // Create the window, but make sure it's not resizeable
@@ -46,28 +134,7 @@ int main()
         static_cast<float>(settings.video_mode.height)/2.f,
         settings.unit_size
     };
-
-    // hovered will keep track of which hex the mouse is currently over
-    std::optional<tess::hex<int>> hovered = std::nullopt;
-
-    // clicked will keep track of which hex was clicked if mouse button is down
-    std::optional<tess::hex<int>> clicked = std::nullopt;
-
-    // clicked_range will keep track of all the hexes from clicked to hovered
-    std::unordered_set<tess::hex<int>> clicked_range;
-
-    // initialize the set of hexes we're working with
-    // and set some basic graphical settings
-    std::vector<tess::hex<int>> hexes;
-    tess::hex_range(tess::hex<int>::zero, 30, std::back_inserter(hexes));
-
-    std::unordered_map<tess::hex<int>, sf::ConvexShape> shapes;
-    for (const auto& hex : hexes) {
-        auto [mapping, _] = shapes.emplace(hex, hex_shape(basis, hex));
-        auto& shape = mapping->second;
-        shape.setOutlineColor(sf::Color::Black);
-        shape.setOutlineThickness(1.0f);
-    }
+    highlight_system system(basis);
 
     while (window.isOpen()) {
         sf::Event event{};
@@ -80,39 +147,22 @@ int main()
                 break;
 
             case sf::Event::MouseMoved: {
-                // convert the sfml point to a tess point
-                // and round it to the nearest hex
-                tess::point hovered_pixel{ event.mouseMove.x,
-                                           event.mouseMove.y };
-                hovered = tess::hex_round<int>(basis.hex(hovered_pixel));
-
-                // if the mouse button is down, update the line from the
-                // clicked hex to the hovered hex
-                if (clicked) {
-                    clicked_range.clear();
-                    auto into_clicked = std::inserter(clicked_range,
-                                                      clicked_range.begin());
-                    tess::line(*clicked, *hovered, into_clicked);
-                }
+                system.on_mouse_move(event.mouseMove.x,
+                                     event.mouseMove.y);
             }
             break;
 
             case sf::Event::MouseButtonPressed: {
-                // keep track of the clicked coordinate
-                // when the mouse button gets pressed
                 if (event.mouseButton.button == sf::Mouse::Button::Left) {
-                    tess::point clicked_pixel{ event.mouseButton.x,
-                                               event.mouseButton.y };
-                    clicked = tess::hex_round<int>(basis.hex(clicked_pixel));
+                    system.on_mouse_pressed(event.mouseButton.x,
+                                            event.mouseButton.y);
                 }
             }
             break;
 
             case sf::Event::MouseButtonReleased:
-                // reset clicked data when the mouse button is released
                 if (event.mouseButton.button == sf::Mouse::Button::Left) {
-                    clicked = std::nullopt;
-                    clicked_range.clear();
+                    system.on_mouse_released();
                 }
                 break;
 
@@ -120,20 +170,7 @@ int main()
             }
         }
         window.clear();
-        for (const auto & [hex, shape] : shapes) {
-
-            // color selected tiles cyan
-            if (hex == hovered ||
-                    clicked_range.find(hex) != clicked_range.end()) {
-
-                shapes[hex].setFillColor(sf::Color::Cyan);
-            }
-            // color non selected tiles white
-            else {
-                shapes[hex].setFillColor(sf::Color::White);
-            }
-            window.draw(shape);
-        }
+        system.draw(window);
         window.display();
     }
 }

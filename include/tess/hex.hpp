@@ -134,9 +134,11 @@ auto line(const Hex& a, const Hex& b, Out into_hexes) noexcept
     };
 
     Integer const n = hex_norm(a-b);
-    for (int i = 1; i <= n; i++) {
+    *into_hexes++ = a;
+    for (int i = 1; i < n; i++) {
         *into_hexes++ = hex_round<Integer>(hex_lerp(a, b, i/(double)n));
     }
+    *into_hexes++ = b;
     return into_hexes;
 }
 

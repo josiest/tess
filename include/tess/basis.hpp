@@ -23,9 +23,6 @@ public:
      *
      * Basis must have a positive `unit_size` measured in pixels. `top`
      * determines if the top of each hex unit is flat or pointed.
-     *
-     * \throws std::invalid_argument if R is not a floating point type or if
-     *                               unit_size is not positive.
      */
     Basis(R x, R y, R unit_size)
 
