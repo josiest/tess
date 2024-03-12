@@ -8,6 +8,8 @@
 #include <iterator>
 
 #include "math.hpp"
+#include <tuple>
+#include <cstddef>
 
 namespace tess {
 
@@ -187,6 +189,24 @@ hex<Field> operator-(const hex<Field>& a, const hex<Field>& b)
     return a + (-b);
 }
 }
+//
+// tuple size
+//
+
+template<typename Field>
+struct std::tuple_size<tess::hex<Field>> {
+    static constexpr const std::size_t value = 2;
+};
+
+//
+// tuple element types
+//
+
+template<std::size_t i, typename Field>
+requires (i < 2)
+struct std::tuple_element<i, tess::hex<Field>> {
+    using type = typename std::add_const<Field>::type;
+};
 
 namespace std {
 
